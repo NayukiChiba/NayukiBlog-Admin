@@ -1,0 +1,519 @@
+import { Octokit } from "@octokit/rest";
+
+// 配置
+const REPO_OWNER = import.meta.env.VITE_GITHUB_OWNER || "NayukiChiba";
+const REPO_NAME = import.meta.env.VITE_GITHUB_REPO || "NayukiBlog";
+const BRANCH = import.meta.env.VITE_GITHUB_BRANCH || "static-blog";
+
+// 文件路径常量
+const PATHS = {
+  articles: "src/content/blog",
+  diaries: "src/data/diaries.json",
+  projects: "src/data/projects.json",
+  books: "src/data/books.json",
+  gallery: "src/data/gallery.json",
+  todos: "src/data/todos.json",
+  tools: "src/data/tools.json",
+};
+
+// 类型定义
+export interface Article {
+  slug: string;
+  title: string;
+  date: string;
+  category: string;
+  tags: string[];
+  description: string;
+  image: string;
+  status: "public" | "draft" | "private";
+  content: string;
+  sha?: string;
+}
+
+export interface Diary {
+  id: number;
+  date: string;
+  content: string;
+  mood: string;
+  weather: string;
+  images: string[];
+}
+
+export interface Project {
+  id: number;
+  name: string;
+  description: string;
+  link: string;
+  techStack: string[];
+  status: "completed" | "in-progress" | "planned";
+  visibility: string;
+}
+
+export interface Book {
+  id: number;
+  title: string;
+  cover: string;
+  url: string;
+  status: string;
+  rating: number;
+  tags: string[];
+}
+
+export interface GalleryItem {
+  id: number;
+  title: string;
+  url: string;
+  date: string;
+  tags: string[];
+  status: string;
+}
+
+export interface Todo {
+  id: number;
+  task: string;
+  completed: boolean;
+  priority: "high" | "medium" | "low";
+  type: "short-term" | "mid-term" | "long-term";
+  progress: number;
+  icon: string;
+  status: string;
+}
+
+export interface Tool {
+  id: number;
+  name: string;
+  description: string;
+  url: string;
+  icon: string;
+  category: string;
+  status: string;
+}
+
+// GitHub API 类
+class GitHubAPI {
+  private octokit: Octokit | null = null;
+  private owner = REPO_OWNER;
+  private repo = REPO_NAME;
+  private branch = BRANCH;
+
+  // 初始化 Octokit
+  init(token: string) {
+    this.octokit = new Octokit({
+      auth: token,
+    });
+  }
+
+  // 检查是否已初始化
+  private checkInit() {
+    if (!this.octokit) {
+      throw new Error("GitHub API 未初始化，请先登录");
+    }
+  }
+
+  // 获取文件内容
+  async getFileContent(
+    path: string,
+  ): Promise<{ content: string; sha: string }> {
+    this.checkInit();
+
+    try {
+      const response = await this.octokit!.repos.getContent({
+        owner: this.owner,
+        repo: this.repo,
+        path,
+        ref: this.branch,
+      });
+
+      if (
+        "content" in response.data &&
+        typeof response.data.content === "string"
+      ) {
+        const content = atob(response.data.content);
+        return {
+          content,
+          sha: response.data.sha,
+        };
+      }
+
+      throw new Error("无法获取文件内容");
+    } catch (error: any) {
+      if (error.status === 404) {
+        throw new Error("文件不存在");
+      }
+      throw error;
+    }
+  }
+
+  // 创建或更新文件
+  async saveFile(
+    path: string,
+    content: string,
+    message: string,
+    sha?: string,
+  ): Promise<string> {
+    this.checkInit();
+
+    const response = await this.octokit!.repos.createOrUpdateFileContents({
+      owner: this.owner,
+      repo: this.repo,
+      path,
+      message,
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: this.branch,
+      ...(sha && { sha }),
+    });
+
+    return response.data.content?.sha || "";
+  }
+
+  // 删除文件
+  async deleteFile(path: string, message: string, sha: string): Promise<void> {
+    this.checkInit();
+
+    await this.octokit!.repos.deleteFile({
+      owner: this.owner,
+      repo: this.repo,
+      path,
+      message,
+      sha,
+      branch: this.branch,
+    });
+  }
+
+  // 列出目录下的文件
+  async listFiles(
+    path: string,
+  ): Promise<Array<{ name: string; path: string; sha: string }>> {
+    this.checkInit();
+
+    const response = await this.octokit!.repos.getContent({
+      owner: this.owner,
+      repo: this.repo,
+      path,
+      ref: this.branch,
+    });
+
+    if (Array.isArray(response.data)) {
+      return response.data
+        .filter((item) => item.type === "file")
+        .map((item) => ({
+          name: item.name,
+          path: item.path,
+          sha: item.sha,
+        }));
+    }
+
+    return [];
+  }
+
+  // ==================== 文章管理 ====================
+
+  // 获取所有文章
+  async getArticles(): Promise<Article[]> {
+    const files = await this.listFiles(PATHS.articles);
+    const articles: Article[] = [];
+
+    for (const file of files) {
+      if (file.name.endsWith(".md")) {
+        try {
+          const { content, sha } = await this.getFileContent(file.path);
+          const article = this.parseMarkdown(content, file.name, sha);
+          articles.push(article);
+        } catch (error) {
+          console.error(`Failed to parse article: ${file.name}`, error);
+        }
+      }
+    }
+
+    // 按日期排序
+    return articles.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }
+
+  // 获取单篇文章
+  async getArticle(slug: string): Promise<Article | null> {
+    const path = `${PATHS.articles}/${slug}.md`;
+
+    try {
+      const { content, sha } = await this.getFileContent(path);
+      return this.parseMarkdown(content, `${slug}.md`, sha);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // 保存文章
+  async saveArticle(article: Article, isNew = false): Promise<void> {
+    const filename = article.slug || this.generateSlug(article.title);
+    const path = `${PATHS.articles}/${filename}.md`;
+    const content = this.generateMarkdown(article);
+    const message = isNew
+      ? `📝 新建文章: ${article.title}`
+      : `✏️ 更新文章: ${article.title}`;
+
+    await this.saveFile(
+      path,
+      content,
+      message,
+      isNew ? undefined : article.sha,
+    );
+  }
+
+  // 删除文章
+  async deleteArticle(slug: string, sha: string): Promise<void> {
+    const path = `${PATHS.articles}/${slug}.md`;
+    await this.deleteFile(path, `🗑️ 删除文章: ${slug}`, sha);
+  }
+
+  // 解析 Markdown 文件
+  private parseMarkdown(
+    content: string,
+    filename: string,
+    sha: string,
+  ): Article {
+    const slug = filename.replace(".md", "");
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+
+    if (!frontmatterMatch) {
+      return {
+        slug,
+        title: slug,
+        date: new Date().toISOString().split("T")[0],
+        category: "",
+        tags: [],
+        description: "",
+        image: "",
+        status: "draft",
+        content: content,
+        sha,
+      };
+    }
+
+    const frontmatter = frontmatterMatch[1];
+    const body = content.slice(frontmatterMatch[0].length).trim();
+
+    // 解析 frontmatter
+    const getValue = (key: string): string => {
+      const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, "m"));
+      return match ? match[1].trim() : "";
+    };
+
+    const getArrayValue = (key: string): string[] => {
+      const match = frontmatter.match(
+        new RegExp(`^${key}:\\s*\\[(.*)\\]$`, "m"),
+      );
+      if (match) {
+        return match[1]
+          .split(",")
+          .map((s) => s.trim().replace(/['"]/g, ""))
+          .filter(Boolean);
+      }
+      return [];
+    };
+
+    return {
+      slug,
+      title: getValue("title"),
+      date: getValue("date"),
+      category: getValue("category"),
+      tags: getArrayValue("tags"),
+      description: getValue("description"),
+      image: getValue("image"),
+      status: (getValue("status") as Article["status"]) || "public",
+      content: body,
+      sha,
+    };
+  }
+
+  // 生成 Markdown 文件
+  private generateMarkdown(article: Article): string {
+    const frontmatter = `---
+title: ${article.title}
+date: ${article.date}
+category: ${article.category}
+tags: [${article.tags.join(", ")}]
+description: ${article.description}
+image: ${article.image}
+status: ${article.status}
+---`;
+
+    return `${frontmatter}\n\n${article.content}`;
+  }
+
+  // 生成 slug
+  private generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\u4e00-\u9fa5-]/g, "");
+  }
+
+  // ==================== JSON 数据管理 ====================
+
+  // 获取 JSON 数据
+  private async getJsonData<T>(
+    path: string,
+  ): Promise<{ data: T; sha: string }> {
+    const { content, sha } = await this.getFileContent(path);
+    return {
+      data: JSON.parse(content),
+      sha,
+    };
+  }
+
+  // 保存 JSON 数据
+  private async saveJsonData<T>(
+    path: string,
+    data: T,
+    message: string,
+    sha: string,
+  ): Promise<string> {
+    const content = JSON.stringify(data, null, 2);
+    return await this.saveFile(path, content, message, sha);
+  }
+
+  // ==================== 日记管理 ====================
+
+  async getDiaries(): Promise<{ diaries: Diary[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ diaries: Diary[] }>(
+      PATHS.diaries,
+    );
+    return { diaries: data.diaries || [], sha };
+  }
+
+  async saveDiaries(
+    diaries: Diary[],
+    sha: string,
+    message = "📔 更新日记",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.diaries, { diaries }, message, sha);
+  }
+
+  // ==================== 项目管理 ====================
+
+  async getProjects(): Promise<{ projects: Project[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ projects: Project[] }>(
+      PATHS.projects,
+    );
+    return { projects: data.projects || [], sha };
+  }
+
+  async saveProjects(
+    projects: Project[],
+    sha: string,
+    message = "📁 更新项目",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.projects, { projects }, message, sha);
+  }
+
+  // ==================== 书籍管理 ====================
+
+  async getBooks(): Promise<{ books: Book[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ books: Book[] }>(
+      PATHS.books,
+    );
+    return { books: data.books || [], sha };
+  }
+
+  async saveBooks(
+    books: Book[],
+    sha: string,
+    message = "📚 更新书籍",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.books, { books }, message, sha);
+  }
+
+  // ==================== 图库管理 ====================
+
+  async getGallery(): Promise<{ gallery: GalleryItem[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ gallery: GalleryItem[] }>(
+      PATHS.gallery,
+    );
+    return { gallery: data.gallery || [], sha };
+  }
+
+  async saveGallery(
+    gallery: GalleryItem[],
+    sha: string,
+    message = "🖼️ 更新图库",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.gallery, { gallery }, message, sha);
+  }
+
+  // ==================== 待办管理 ====================
+
+  async getTodos(): Promise<{ todos: Todo[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ todos: Todo[] }>(
+      PATHS.todos,
+    );
+    return { todos: data.todos || [], sha };
+  }
+
+  async saveTodos(
+    todos: Todo[],
+    sha: string,
+    message = "✅ 更新待办",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.todos, { todos }, message, sha);
+  }
+
+  // ==================== 工具管理 ====================
+
+  async getTools(): Promise<{ tools: Tool[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ tools: Tool[] }>(
+      PATHS.tools,
+    );
+    return { tools: data.tools || [], sha };
+  }
+
+  async saveTools(
+    tools: Tool[],
+    sha: string,
+    message = "🔧 更新工具",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.tools, { tools }, message, sha);
+  }
+
+  // ==================== 统计信息 ====================
+
+  async getStats(): Promise<{
+    articles: number;
+    diaries: number;
+    projects: number;
+    books: number;
+    gallery: number;
+    todos: number;
+  }> {
+    try {
+      const [articles, diaries, projects, books, gallery, todos] =
+        await Promise.all([
+          this.listFiles(PATHS.articles).then(
+            (files) => files.filter((f) => f.name.endsWith(".md")).length,
+          ),
+          this.getDiaries().then((r) => r.diaries.length),
+          this.getProjects().then((r) => r.projects.length),
+          this.getBooks().then((r) => r.books.length),
+          this.getGallery().then((r) => r.gallery.length),
+          this.getTodos().then((r) => r.todos.length),
+        ]);
+
+      return { articles, diaries, projects, books, gallery, todos };
+    } catch (error) {
+      console.error("Failed to get stats:", error);
+      return {
+        articles: 0,
+        diaries: 0,
+        projects: 0,
+        books: 0,
+        gallery: 0,
+        todos: 0,
+      };
+    }
+  }
+}
+
+// 导出单例
+export const githubAPI = new GitHubAPI();
+
+export default githubAPI;
