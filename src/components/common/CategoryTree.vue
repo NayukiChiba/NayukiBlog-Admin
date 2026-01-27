@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import SvgIcon from './SvgIcon.vue';
+import { ref, watch } from "vue";
+import SvgIcon from "./SvgIcon.vue";
 
 const props = defineProps<{
   modelValue: string;
@@ -8,7 +8,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  'update:modelValue': [value: string];
+  "update:modelValue": [value: string];
 }>();
 
 export interface CategoryNode {
@@ -20,17 +20,21 @@ export interface CategoryNode {
 const expandedPaths = ref<Set<string>>(new Set());
 
 // Initialize expanded state based on current value
-watch(() => props.modelValue, (newValue) => {
-  if (newValue) {
-    // Expand parent folders for the selected category
-    const parts = newValue.split('/');
-    let path = '';
-    for (let i = 0; i < parts.length - 1; i++) {
-      path = path ? `${path}/${parts[i]}` : parts[i];
-      expandedPaths.value.add(path);
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue) {
+      // Expand parent folders for the selected category
+      const parts = newValue.split("/");
+      let path = "";
+      for (let i = 0; i < parts.length - 1; i++) {
+        path = path ? `${path}/${parts[i]}` : parts[i];
+        expandedPaths.value.add(path);
+      }
     }
-  }
-}, { immediate: true });
+  },
+  { immediate: true },
+);
 
 function toggleExpand(path: string) {
   if (expandedPaths.value.has(path)) {
@@ -45,7 +49,7 @@ function isExpanded(path: string): boolean {
 }
 
 function selectCategory(path: string) {
-  emit('update:modelValue', path);
+  emit("update:modelValue", path);
 }
 
 function hasChildren(node: CategoryNode): boolean {
@@ -55,11 +59,7 @@ function hasChildren(node: CategoryNode): boolean {
 
 <template>
   <div class="category-tree">
-    <div
-      v-for="node in categories"
-      :key="node.path"
-      class="tree-node"
-    >
+    <div v-for="node in categories" :key="node.path" class="tree-node">
       <div
         class="node-content"
         :class="{ 'is-selected': modelValue === node.path }"
@@ -79,7 +79,13 @@ function hasChildren(node: CategoryNode): boolean {
         <span v-else class="expand-placeholder"></span>
 
         <SvgIcon
-          :name="hasChildren(node) ? (isExpanded(node.path) ? 'folder-open' : 'folder') : 'folder'"
+          :name="
+            hasChildren(node)
+              ? isExpanded(node.path)
+                ? 'folder-open'
+                : 'folder'
+              : 'folder'
+          "
           :size="16"
           class="folder-icon"
         />
