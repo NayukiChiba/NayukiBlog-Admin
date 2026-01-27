@@ -11,6 +11,7 @@ export { default as CategoryTree } from "./CategoryTree.vue";
 export { default as ImageUpload } from "./ImageUpload.vue";
 export { default as DevPreviewBanner } from "./DevPreviewBanner.vue";
 export { default as CustomSelect } from "./CustomSelect.vue";
+export { default as FolderPickerModal } from "./FolderPickerModal.vue";
 
 // Re-export types
 export type { CategoryNode } from "./CategoryTree.vue";

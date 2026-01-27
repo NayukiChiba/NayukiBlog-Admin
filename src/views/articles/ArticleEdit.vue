@@ -9,7 +9,7 @@ import {
   LoadingState,
   FormGroup,
   SvgIcon,
-  CategoryTree,
+  FolderPickerModal,
   type CategoryNode,
 } from "@/components/common";
 
@@ -95,7 +95,7 @@ const statusOptions = [
 
 // 预览模式
 const showPreview = ref(false);
-const showCategoryDropdown = ref(false);
+const showFolderPicker = ref(false);
 
 // 添加标签
 function addTag() {
@@ -141,7 +141,18 @@ watch(
 // 选择分类
 function selectCategory(path: string) {
   form.value.category = path;
-  showCategoryDropdown.value = false;
+}
+
+// 创建新文件夹（这里只是演示，实际需要更新 categoryTree）
+function handleCreateFolder(parentPath: string, folderName: string) {
+  // 构建新路径
+  const newPath = parentPath ? `${parentPath}/${folderName}` : folderName;
+
+  // TODO: 这里应该调用 API 创建文件夹，或者更新本地 categoryTree
+  // 目前先简单地选中这个新路径
+  form.value.category = newPath;
+
+  console.log("创建文件夹:", { parentPath, folderName, newPath });
 }
 
 // 获取分类显示名称
@@ -602,31 +613,22 @@ onMounted(() => {
             <input v-model="form.date" type="date" class="form-input" />
           </FormGroup>
 
-          <!-- 分类 - 文件夹树形式 -->
+          <!-- 分类 - 文件夹选择弹窗 -->
           <FormGroup label="分类">
             <div class="category-selector">
               <button
                 type="button"
                 class="category-trigger"
-                @click="showCategoryDropdown = !showCategoryDropdown"
+                @click="showFolderPicker = true"
               >
                 <SvgIcon name="folder" :size="16" />
                 <span>{{ getCategoryDisplayName(form.category) }}</span>
                 <SvgIcon
-                  :name="
-                    showCategoryDropdown ? 'chevron-down' : 'chevron-right'
-                  "
+                  name="chevron-right"
                   :size="14"
                   class="trigger-arrow"
                 />
               </button>
-              <div v-if="showCategoryDropdown" class="category-dropdown">
-                <CategoryTree
-                  v-model="form.category"
-                  :categories="categoryTree"
-                  @update:model-value="selectCategory"
-                />
-              </div>
             </div>
             <p class="form-hint">当前路径: {{ form.category }}</p>
           </FormGroup>
@@ -703,6 +705,16 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- 文件夹选择弹窗 -->
+    <FolderPickerModal
+      :show="showFolderPicker"
+      :model-value="form.category"
+      :categories="categoryTree"
+      @update:model-value="selectCategory"
+      @close="showFolderPicker = false"
+      @create-folder="handleCreateFolder"
+    />
   </div>
 </template>
 

@@ -42,3 +42,4 @@ coverage/
 
 # Workers 依赖（各自有自己的 node_modules）
 workers/*/node_modules/
+temp.md
