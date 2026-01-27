@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Article } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
-import { DevPreviewBanner } from "@/components/common";
+import { DevPreviewBanner, CustomSelect } from "@/components/common";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -272,20 +272,26 @@ onMounted(() => {
         />
       </div>
       <div class="filter-item">
-        <select v-model="selectedCategory" class="input">
-          <option value="">所有分类</option>
-          <option v-for="cat in categories" :key="cat" :value="cat">
-            {{ cat }}
-          </option>
-        </select>
+        <CustomSelect
+          v-model="selectedCategory"
+          :options="[
+            { value: '', label: '所有分类' },
+            ...categories.map((cat) => ({ value: cat, label: cat })),
+          ]"
+          placeholder="所有分类"
+        />
       </div>
       <div class="filter-item">
-        <select v-model="selectedStatus" class="input">
-          <option value="">所有状态</option>
-          <option value="public">已发布</option>
-          <option value="draft">草稿</option>
-          <option value="private">私密</option>
-        </select>
+        <CustomSelect
+          v-model="selectedStatus"
+          :options="[
+            { value: '', label: '所有状态' },
+            { value: 'public', label: '已发布' },
+            { value: 'draft', label: '草稿' },
+            { value: 'private', label: '私密' },
+          ]"
+          placeholder="所有状态"
+        />
       </div>
     </div>
 

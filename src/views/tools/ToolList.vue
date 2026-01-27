@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Tool } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
-import { DevPreviewBanner } from "@/components/common";
+import { DevPreviewBanner, CustomSelect } from "@/components/common";
 
 const authStore = useAuthStore();
 
@@ -327,12 +327,14 @@ onMounted(() => {
         />
       </div>
       <div class="filter-item">
-        <select v-model="selectedCategory" class="input">
-          <option value="">所有分类</option>
-          <option v-for="cat in categories" :key="cat" :value="cat">
-            {{ cat }}
-          </option>
-        </select>
+        <CustomSelect
+          v-model="selectedCategory"
+          :options="[
+            { value: '', label: '所有分类' },
+            ...categories.map((cat) => ({ value: cat, label: cat })),
+          ]"
+          placeholder="所有分类"
+        />
       </div>
     </div>
 

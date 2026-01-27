@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type GalleryItem } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
-import { DevPreviewBanner } from "@/components/common";
+import { DevPreviewBanner, CustomSelect } from "@/components/common";
 
 const authStore = useAuthStore();
 
@@ -358,16 +358,17 @@ onMounted(() => {
         />
       </div>
       <div class="filter-item">
-        <select v-model="selectedStatus" class="input">
-          <option value="">所有状态</option>
-          <option
-            v-for="opt in statusOptions"
-            :key="opt.value"
-            :value="opt.value"
-          >
-            {{ opt.label }}
-          </option>
-        </select>
+        <CustomSelect
+          v-model="selectedStatus"
+          :options="[
+            { value: '', label: '所有状态' },
+            ...statusOptions.map((opt) => ({
+              value: opt.value,
+              label: opt.label,
+            })),
+          ]"
+          placeholder="所有状态"
+        />
       </div>
     </div>
 
