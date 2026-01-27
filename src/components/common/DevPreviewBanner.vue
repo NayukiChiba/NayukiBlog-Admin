@@ -7,7 +7,7 @@ interface Props {
   showLoginLink?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   showLoginLink: true,
 });
 
@@ -57,7 +57,10 @@ function goToLogin() {
   </div>
 
   <!-- 未登录提示（非预览模式） -->
-  <div v-else-if="!isPreviewMode && !isLoggedIn" class="dev-preview-banner warning">
+  <div
+    v-else-if="!isPreviewMode && !isLoggedIn"
+    class="dev-preview-banner warning"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="16"
@@ -79,7 +82,11 @@ function goToLogin() {
       <router-link v-if="showLoginLink" to="/login" class="banner-link"
         >登录</router-link
       >
-      <span v-else @click="goToLogin" class="banner-link" style="cursor: pointer"
+      <span
+        v-else
+        @click="goToLogin"
+        class="banner-link"
+        style="cursor: pointer"
         >登录</span
       >
       后查看。
