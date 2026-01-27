@@ -55,7 +55,6 @@ export interface Book {
   cover: string;
   url: string;
   status: string;
-  rating: number;
   tags: string[];
 }
 

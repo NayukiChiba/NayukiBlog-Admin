@@ -1307,6 +1307,7 @@ onMounted(() => {
   width: 100%;
   height: 8px;
   -webkit-appearance: none;
+  appearance: none;
   background: #e2e8f0;
   border-radius: 4px;
   outline: none;
@@ -1314,6 +1315,7 @@ onMounted(() => {
 
 .progress-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
+  appearance: none;
   width: 20px;
   height: 20px;
   background: #2563eb;

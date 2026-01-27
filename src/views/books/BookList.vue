@@ -33,15 +33,11 @@ const form = ref<Book>({
   cover: "",
   url: "",
   status: "published",
-  rating: 5,
   tags: [],
 });
 
 // 标签输入
 const tagInput = ref("");
-
-// 评分选项
-const ratingOptions = [1, 2, 3, 4, 5];
 
 // 筛选后的书籍列表
 const filteredBooks = computed(() => {
@@ -95,7 +91,6 @@ function openNewModal() {
     cover: "https://img.yumeko.site/file/wife/早坂爱.jpg",
     url: "",
     status: "published",
-    rating: 5,
     tags: [],
   };
   showModal.value = true;
@@ -200,11 +195,6 @@ async function deleteBook(book: Book) {
     error.value = err instanceof Error ? err.message : "删除失败";
     fetchBooks();
   }
-}
-
-// 渲染星星
-function renderStars(rating: number): string {
-  return "★".repeat(rating) + "☆".repeat(5 - rating);
 }
 
 // 退出开发预览模式 - 由 DevPreviewBanner 组件处理
@@ -340,9 +330,6 @@ onMounted(() => {
           </div>
           <div class="book-info">
             <h3 class="book-title">{{ book.title }}</h3>
-            <div class="book-rating">
-              <span class="stars">{{ renderStars(book.rating) }}</span>
-            </div>
             <div class="book-tags">
               <span v-for="tag in book.tags.slice(0, 3)" :key="tag" class="tag">
                 {{ tag }}
@@ -474,21 +461,6 @@ onMounted(() => {
               class="input"
               placeholder="https://book.douban.com/..."
             />
-          </div>
-
-          <!-- 评分 -->
-          <div class="form-group">
-            <label class="form-label">评分</label>
-            <div class="rating-options">
-              <button
-                v-for="r in ratingOptions"
-                :key="r"
-                :class="['rating-btn', { active: form.rating >= r }]"
-                @click="form.rating = r"
-              >
-                ★
-              </button>
-            </div>
           </div>
 
           <!-- 标签 -->
@@ -682,16 +654,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.book-rating {
-  margin-bottom: 0.5rem;
-}
-
-.stars {
-  color: #f59e0b;
-  font-size: 0.875rem;
-  letter-spacing: 1px;
-}
-
 .book-tags {
   display: flex;
   flex-wrap: wrap;
@@ -777,35 +739,6 @@ onMounted(() => {
 .action-btn-danger:hover {
   background: #fef2f2;
   color: #dc2626;
-}
-
-/* 评分选项 */
-.rating-options {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.rating-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  font-size: 1.25rem;
-  color: #e2e8f0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.rating-btn:hover {
-  color: #f59e0b;
-  transform: scale(1.1);
-}
-
-.rating-btn.active {
-  color: #f59e0b;
 }
 
 /* 标签输入 */
