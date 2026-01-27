@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Tool } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
+import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
 
@@ -33,21 +34,9 @@ const form = ref({
   description: "",
   url: "",
   icon: "🔧",
-  category: "开发工具",
+  category: "",
   status: "active",
 });
-
-// 分类选项
-const categoryOptions = [
-  "开发工具",
-  "设计工具",
-  "效率工具",
-  "写作工具",
-  "AI工具",
-  "学习资源",
-  "娱乐",
-  "其他",
-];
 
 // 图标选项
 // iconOptions 已移除 - 用户直接在 JSON 中填写 SVG 代码
@@ -115,10 +104,10 @@ async function fetchTools() {
   }
 }
 
-// 退出开发预览模式
-function exitPreviewMode() {
-  localStorage.removeItem("dev_preview");
-  window.location.href = "/login";
+// 退出开发预览模式 - 由 DevPreviewBanner 组件处理
+function handleExitPreview() {
+  // 组件会处理跳转，这里只需刷新状态
+  isPreviewMode.value = false;
 }
 
 // 打开新建模态框
@@ -131,7 +120,7 @@ function openNewModal() {
     description: "",
     url: "",
     icon: "",
-    category: "开发工具",
+    category: "",
     status: "active",
   };
   showModal.value = true;
@@ -254,6 +243,13 @@ onMounted(() => {
 
 <template>
   <div class="tool-list">
+    <!-- 开发预览模式/未登录提示 -->
+    <DevPreviewBanner
+      :is-preview-mode="isPreviewMode"
+      :is-logged-in="!!authStore.token"
+      @exit-preview="handleExitPreview"
+    />
+
     <!-- 顶部操作栏 -->
     <div class="page-header">
       <div class="header-left">
@@ -297,55 +293,6 @@ onMounted(() => {
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
       </svg>
       <span>{{ successMessage }}</span>
-    </div>
-
-    <!-- 开发预览模式提示 -->
-    <div v-if="isPreviewMode && !authStore.token" class="preview-message">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </svg>
-      <span>
-        开发预览模式 - 当前为样式测试，数据不会被获取。
-        <router-link to="/login">前往登录</router-link>
-      </span>
-      <button class="exit-preview-btn" @click="exitPreviewMode">
-        退出预览
-      </button>
-    </div>
-
-    <!-- 未登录提示（非预览模式） -->
-    <div v-if="!isPreviewMode && !authStore.token" class="warning-message">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-      <span>
-        未登录，无法获取数据。请
-        <router-link to="/login">登录</router-link>
-        后查看。
-      </span>
     </div>
 
     <!-- 错误提示 -->
@@ -585,11 +532,12 @@ onMounted(() => {
           <!-- 分类 -->
           <div class="form-group">
             <label class="form-label">分类</label>
-            <select v-model="form.category" class="input">
-              <option v-for="cat in categoryOptions" :key="cat" :value="cat">
-                {{ cat }}
-              </option>
-            </select>
+            <input
+              v-model="form.category"
+              type="text"
+              class="input"
+              placeholder="输入分类名称，如：开发工具、AI工具..."
+            />
           </div>
 
           <!-- 图标 -->
@@ -669,57 +617,7 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-.warning-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 0.5rem;
-  color: #b45309;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.warning-message a {
-  color: #2563eb;
-  text-decoration: underline;
-}
-
-.preview-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 0.5rem;
-  color: #1d4ed8;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.preview-message a {
-  color: #2563eb;
-  text-decoration: underline;
-}
-
-.exit-preview-btn {
-  margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.exit-preview-btn:hover {
-  background: #1d4ed8;
-}
+/* 提示消息样式 - 使用 DevPreviewBanner 组件代替 preview-message 和 warning-message */
 
 .close-btn {
   margin-left: auto;

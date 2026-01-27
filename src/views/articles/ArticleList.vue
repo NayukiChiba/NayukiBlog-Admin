@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Article } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
+import { DevPreviewBanner } from "@/components/common";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -111,10 +112,10 @@ function refreshList() {
   fetchArticles();
 }
 
-// 退出开发预览模式
-function exitPreviewMode() {
-  localStorage.removeItem("dev_preview");
-  window.location.href = "/login";
+// 退出开发预览模式 - 由 DevPreviewBanner 组件处理
+function handleExitPreview() {
+  // 组件会处理跳转，这里只需刷新状态
+  isPreviewMode.value = false;
 }
 
 // 格式化日期
@@ -162,6 +163,13 @@ onMounted(() => {
 
 <template>
   <div class="article-list">
+    <!-- 开发预览模式/未登录提示 -->
+    <DevPreviewBanner
+      :is-preview-mode="isPreviewMode"
+      :is-logged-in="!!authStore.token"
+      @exit-preview="handleExitPreview"
+    />
+
     <!-- 顶部操作栏 -->
     <div class="page-header">
       <div class="header-left">
@@ -233,56 +241,6 @@ onMounted(() => {
     </div>
 
     <!-- 错误消息 -->
-    <!-- 开发预览模式提示 -->
-    <div v-if="isPreviewMode && !authStore.token" class="preview-message">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </svg>
-      <span
-        >开发预览模式 - 仅用于测试页面样式，数据功能需要<router-link to="/login"
-          >登录</router-link
-        ></span
-      >
-      <button @click="exitPreviewMode" class="exit-preview-btn">
-        退出预览
-      </button>
-    </div>
-
-    <!-- 未登录提示 -->
-    <div v-else-if="!authStore.token" class="warning-message">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-      <span
-        >未登录，无法获取文章列表。<router-link to="/login"
-          >点击登录</router-link
-        ></span
-      >
-    </div>
-
     <div v-if="error" class="error-message">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -497,11 +455,10 @@ onMounted(() => {
 }
 
 /* 消息提示 */
+/* 提示消息样式 - 使用 DevPreviewBanner 组件代替 preview-message 和 warning-message */
+
 .success-message,
-.error-message,
-.info-message,
-.warning-message,
-.preview-message {
+.error-message {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -521,58 +478,6 @@ onMounted(() => {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #dc2626;
-}
-
-.info-message {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #2563eb;
-}
-
-.info-message a {
-  color: #1d4ed8;
-  font-weight: 500;
-  text-decoration: underline;
-}
-
-.warning-message {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #d97706;
-}
-
-.warning-message a {
-  color: #b45309;
-  font-weight: 500;
-  text-decoration: underline;
-}
-
-.preview-message {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #2563eb;
-}
-
-.preview-message a {
-  color: #1d4ed8;
-  font-weight: 500;
-  text-decoration: underline;
-}
-
-.exit-preview-btn {
-  margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.exit-preview-btn:hover {
-  background: #1d4ed8;
 }
 
 .close-btn {

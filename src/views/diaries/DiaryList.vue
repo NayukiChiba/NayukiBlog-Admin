@@ -12,6 +12,7 @@ import {
   FormGroup,
   SvgIcon,
   ImageUpload,
+  DevPreviewBanner,
 } from "@/components/common";
 
 const authStore = useAuthStore();
@@ -236,10 +237,10 @@ function formatRelativeTime(dateStr: string) {
   return `${Math.floor(days / 30)} 个月前`;
 }
 
-// 退出开发预览模式
-function exitPreviewMode() {
-  localStorage.removeItem("dev_preview");
-  window.location.href = "/login";
+// 退出开发预览模式 - 由 DevPreviewBanner 组件处理
+function handleExitPreview() {
+  // 组件会处理跳转，这里只需刷新状态
+  isPreviewMode.value = false;
 }
 
 onMounted(() => {
@@ -259,21 +260,12 @@ onMounted(() => {
       </template>
     </PageHeader>
 
-    <!-- 开发预览模式提示 -->
-    <MessageBox v-if="isPreviewMode && !authStore.token" type="preview">
-      开发预览模式 - 当前为样式测试，数据不会被获取或保存。
-      <router-link to="/login">前往登录</router-link>
-      <button class="exit-preview-btn" @click="exitPreviewMode">
-        退出预览
-      </button>
-    </MessageBox>
-
-    <!-- 未登录提示（非预览模式） -->
-    <MessageBox v-if="!isPreviewMode && !authStore.token" type="warning">
-      未登录，无法获取或保存日记。请
-      <router-link to="/login">登录</router-link>
-      后操作。
-    </MessageBox>
+    <!-- 开发预览模式/未登录提示 -->
+    <DevPreviewBanner
+      :is-preview-mode="isPreviewMode"
+      :is-logged-in="!!authStore.token"
+      @exit-preview="handleExitPreview"
+    />
 
     <!-- 成功提示 -->
     <MessageBox

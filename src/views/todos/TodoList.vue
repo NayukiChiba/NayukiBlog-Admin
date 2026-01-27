@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Todo } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
+import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
 
@@ -123,10 +124,10 @@ async function fetchTodos() {
   }
 }
 
-// 退出开发预览模式
-function exitPreviewMode() {
-  localStorage.removeItem("dev_preview");
-  window.location.href = "/login";
+// 退出开发预览模式 - 由 DevPreviewBanner 组件处理
+function handleExitPreview() {
+  // 组件会处理跳转，这里只需刷新状态
+  isPreviewMode.value = false;
 }
 
 // 打开新建模态框
@@ -339,19 +340,12 @@ onMounted(() => {
 
 <template>
   <div class="todo-list">
-    <!-- 开发预览模式提示 -->
-    <div v-if="isPreviewMode" class="preview-message">
-      <span class="preview-icon">👁️</span>
-      <span>开发预览模式 - 仅用于样式测试，数据为空或模拟</span>
-      <button @click="exitPreviewMode" class="exit-preview-btn">
-        退出预览
-      </button>
-    </div>
-
-    <!-- 未登录提示 -->
-    <div v-if="!authStore.token && !isPreviewMode" class="warning-message">
-      <span>⚠️ 未登录，无法获取数据</span>
-    </div>
+    <!-- 开发预览模式/未登录提示 -->
+    <DevPreviewBanner
+      :is-preview-mode="isPreviewMode"
+      :is-logged-in="!!authStore.token"
+      @exit-preview="handleExitPreview"
+    />
 
     <!-- 顶部操作栏 -->
     <div class="page-header">
@@ -745,7 +739,7 @@ onMounted(() => {
 
 <style scoped>
 .todo-list {
-  max-width: 900px;
+  max-width: 1200px;
 }
 
 .page-header {
@@ -799,54 +793,8 @@ onMounted(() => {
 }
 
 /* 预览模式提示 */
-.preview-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 0.5rem;
-  color: #2563eb;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
+/* 提示消息样式 - 使用 DevPreviewBanner 组件代替 preview-message 和 warning-message */
 
-.preview-icon {
-  font-size: 1rem;
-}
-
-.exit-preview-btn {
-  margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.exit-preview-btn:hover {
-  background: #1d4ed8;
-}
-
-/* 警告提示 */
-.warning-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 0.5rem;
-  color: #b45309;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-/* 提示消息 */
 .success-message {
   display: flex;
   align-items: center;
