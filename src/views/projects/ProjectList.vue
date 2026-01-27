@@ -24,7 +24,6 @@ const editingProject = ref<Project | null>(null);
 const isNewProject = ref(false);
 
 // 筛选
-const searchQuery = ref("");
 const selectedStatus = ref("");
 
 // 表单数据
@@ -51,17 +50,10 @@ const statusOptions = [
 // 筛选后的项目列表
 const filteredProjects = computed(() => {
   return projects.value.filter((project) => {
-    const matchesSearch =
-      !searchQuery.value ||
-      project.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      project.description
-        .toLowerCase()
-        .includes(searchQuery.value.toLowerCase());
-
     const matchesStatus =
       !selectedStatus.value || project.status === selectedStatus.value;
 
-    return matchesSearch && matchesStatus;
+    return matchesStatus;
   });
 });
 
@@ -327,14 +319,6 @@ onMounted(() => {
 
     <!-- 筛选栏 -->
     <div class="filter-bar card">
-      <div class="filter-item">
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="input"
-          placeholder="搜索项目名称或描述..."
-        />
-      </div>
       <div class="filter-item">
         <CustomSelect
           v-model="selectedStatus"
@@ -704,11 +688,6 @@ onMounted(() => {
 .filter-item {
   flex: 1;
   max-width: 300px;
-}
-
-.filter-item:first-child {
-  flex: 2;
-  max-width: 400px;
 }
 
 /* 项目网格 */

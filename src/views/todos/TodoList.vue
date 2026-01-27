@@ -23,12 +23,6 @@ const showModal = ref(false);
 const editingTodo = ref<Todo | null>(null);
 const isNewTodo = ref(false);
 
-// 筛选
-const selectedType = ref<"all" | "short-term" | "mid-term" | "long-term">(
-  "all",
-);
-const showCompleted = ref(true);
-
 // 表单
 const form = ref({
   id: 0,
@@ -58,20 +52,10 @@ const typeOptions = [
 // 图标选项
 // iconOptions 已移除 - 用户直接在 JSON 中填写 SVG 代码
 
-// 筛选后的待办列表
-const filteredTodos = computed(() => {
-  return todos.value.filter((todo) => {
-    const matchesType =
-      selectedType.value === "all" || todo.type === selectedType.value;
-    const matchesCompleted = showCompleted.value || !todo.completed;
-    return matchesType && matchesCompleted;
-  });
-});
-
 // 按优先级和完成状态排序
 const sortedTodos = computed(() => {
   const priorityOrder = { high: 0, medium: 1, low: 2 };
-  return [...filteredTodos.value].sort((a, b) => {
+  return [...todos.value].sort((a, b) => {
     // 未完成的排在前面
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1;
@@ -452,40 +436,6 @@ onMounted(() => {
       <button class="close-btn" @click="error = null">×</button>
     </div>
 
-    <!-- 筛选栏 -->
-    <div class="filter-bar card">
-      <div class="filter-tabs">
-        <button
-          :class="['filter-tab', { active: selectedType === 'all' }]"
-          @click="selectedType = 'all'"
-        >
-          全部
-        </button>
-        <button
-          :class="['filter-tab', { active: selectedType === 'short-term' }]"
-          @click="selectedType = 'short-term'"
-        >
-          ⚡ 短期
-        </button>
-        <button
-          :class="['filter-tab', { active: selectedType === 'mid-term' }]"
-          @click="selectedType = 'mid-term'"
-        >
-          📅 中期
-        </button>
-        <button
-          :class="['filter-tab', { active: selectedType === 'long-term' }]"
-          @click="selectedType = 'long-term'"
-        >
-          🎯 长期
-        </button>
-      </div>
-      <label class="checkbox-label">
-        <input type="checkbox" v-model="showCompleted" />
-        <span>显示已完成</span>
-      </label>
-    </div>
-
     <!-- 待办列表 -->
     <div class="card">
       <!-- 加载状态 -->
@@ -833,55 +783,6 @@ onMounted(() => {
 
 .close-btn:hover {
   opacity: 0.7;
-}
-
-/* 筛选栏 */
-.filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-}
-
-.filter-tabs {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.filter-tab {
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-tab:hover {
-  background: #f1f5f9;
-}
-
-.filter-tab.active {
-  background: #eff6ff;
-  color: #2563eb;
-  border-color: #bfdbfe;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #64748b;
-  cursor: pointer;
-}
-
-.checkbox-label input {
-  width: 16px;
-  height: 16px;
 }
 
 /* 待办项 */

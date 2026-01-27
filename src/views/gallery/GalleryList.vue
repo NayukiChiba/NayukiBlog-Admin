@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type GalleryItem } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
-import { DevPreviewBanner, CustomSelect } from "@/components/common";
+import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
 
@@ -22,10 +22,6 @@ const successMessage = ref<string | null>(null);
 const showModal = ref(false);
 const editingItem = ref<GalleryItem | null>(null);
 const isNewItem = ref(false);
-
-// 搜索与筛选
-const searchQuery = ref("");
-const selectedStatus = ref("");
 
 // 表单
 const form = ref({
@@ -46,26 +42,9 @@ const statusOptions = [
   { value: "private", label: "私密", color: "gray" },
 ];
 
-// 筛选后的图片列表
-const filteredGallery = computed(() => {
-  return gallery.value.filter((item) => {
-    const matchesSearch =
-      !searchQuery.value ||
-      item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      item.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.value.toLowerCase()),
-      );
-
-    const matchesStatus =
-      !selectedStatus.value || item.status === selectedStatus.value;
-
-    return matchesSearch && matchesStatus;
-  });
-});
-
 // 按日期排序
 const sortedGallery = computed(() => {
-  return [...filteredGallery.value].sort(
+  return [...gallery.value].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 });
@@ -345,31 +324,6 @@ onMounted(() => {
       </svg>
       <span>{{ error }}</span>
       <button class="close-btn" @click="error = null">×</button>
-    </div>
-
-    <!-- 筛选栏 -->
-    <div class="filter-bar card">
-      <div class="filter-item">
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="input"
-          placeholder="搜索图片标题或标签..."
-        />
-      </div>
-      <div class="filter-item">
-        <CustomSelect
-          v-model="selectedStatus"
-          :options="[
-            { value: '', label: '所有状态' },
-            ...statusOptions.map((opt) => ({
-              value: opt.value,
-              label: opt.label,
-            })),
-          ]"
-          placeholder="所有状态"
-        />
-      </div>
     </div>
 
     <!-- 图库内容 -->
@@ -703,24 +657,6 @@ onMounted(() => {
 
 .close-btn:hover {
   opacity: 0.7;
-}
-
-/* 筛选栏 */
-.filter-bar {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.filter-item {
-  flex: 1;
-  max-width: 300px;
-}
-
-.filter-item:first-child {
-  flex: 2;
-  max-width: 400px;
 }
 
 /* 图片网格 */

@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Article } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
-import { DevPreviewBanner, CustomSelect } from "@/components/common";
+import { DevPreviewBanner } from "@/components/common";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -16,8 +16,6 @@ const isPreviewMode = ref(false);
 const loading = ref(false);
 const articles = ref<Article[]>([]);
 const searchQuery = ref("");
-const selectedCategory = ref("");
-const selectedStatus = ref("");
 const error = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
 
@@ -31,19 +29,8 @@ const filteredArticles = computed(() => {
         .toLowerCase()
         .includes(searchQuery.value.toLowerCase());
 
-    const matchesCategory =
-      !selectedCategory.value || article.category === selectedCategory.value;
-    const matchesStatus =
-      !selectedStatus.value || article.status === selectedStatus.value;
-
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch;
   });
-});
-
-// 获取所有分类
-const categories = computed(() => {
-  const cats = new Set(articles.value.map((a) => a.category).filter(Boolean));
-  return Array.from(cats);
 });
 
 // 获取文章列表
@@ -271,28 +258,6 @@ onMounted(() => {
           placeholder="搜索文章标题或描述..."
         />
       </div>
-      <div class="filter-item">
-        <CustomSelect
-          v-model="selectedCategory"
-          :options="[
-            { value: '', label: '所有分类' },
-            ...categories.map((cat) => ({ value: cat, label: cat })),
-          ]"
-          placeholder="所有分类"
-        />
-      </div>
-      <div class="filter-item">
-        <CustomSelect
-          v-model="selectedStatus"
-          :options="[
-            { value: '', label: '所有状态' },
-            { value: 'public', label: '已发布' },
-            { value: 'draft', label: '草稿' },
-            { value: 'private', label: '私密' },
-          ]"
-          placeholder="所有状态"
-        />
-      </div>
     </div>
 
     <!-- 文章列表 -->
@@ -510,12 +475,7 @@ onMounted(() => {
 
 .filter-item {
   flex: 1;
-  max-width: 300px;
-}
-
-.filter-item:first-child {
-  flex: 2;
-  max-width: 400px;
+  max-width: 600px;
 }
 
 /* 卡片 */

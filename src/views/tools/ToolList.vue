@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Tool } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
-import { DevPreviewBanner, CustomSelect } from "@/components/common";
+import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
 
@@ -23,9 +23,8 @@ const showModal = ref(false);
 const editingTool = ref<Tool | null>(null);
 const isNewTool = ref(false);
 
-// 搜索与筛选
+// 搜索
 const searchQuery = ref("");
-const selectedCategory = ref("");
 
 // 表单
 const form = ref({
@@ -41,12 +40,6 @@ const form = ref({
 // 图标选项
 // iconOptions 已移除 - 用户直接在 JSON 中填写 SVG 代码
 
-// 获取所有分类（从数据中动态获取）
-const categories = computed(() => {
-  const cats = new Set(tools.value.map((t) => t.category).filter(Boolean));
-  return Array.from(cats);
-});
-
 // 筛选后的工具列表
 const filteredTools = computed(() => {
   return tools.value.filter((tool) => {
@@ -55,10 +48,7 @@ const filteredTools = computed(() => {
       tool.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       tool.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
-    const matchesCategory =
-      !selectedCategory.value || tool.category === selectedCategory.value;
-
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 });
 
@@ -256,6 +246,12 @@ onMounted(() => {
         <p class="page-description">收集和管理你常用的工具和资源</p>
       </div>
       <div class="header-right">
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="search-input"
+          placeholder="搜索工具名称或描述..."
+        />
         <button class="btn btn-primary" @click="openNewModal">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -314,28 +310,6 @@ onMounted(() => {
       </svg>
       <span>{{ error }}</span>
       <button class="close-btn" @click="error = null">×</button>
-    </div>
-
-    <!-- 筛选栏 -->
-    <div class="filter-bar card">
-      <div class="filter-item">
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="input"
-          placeholder="搜索工具名称或描述..."
-        />
-      </div>
-      <div class="filter-item">
-        <CustomSelect
-          v-model="selectedCategory"
-          :options="[
-            { value: '', label: '所有分类' },
-            ...categories.map((cat) => ({ value: cat, label: cat })),
-          ]"
-          placeholder="所有分类"
-        />
-      </div>
     </div>
 
     <!-- 工具内容 -->
@@ -484,7 +458,7 @@ onMounted(() => {
     <div class="stats-bar">
       <span
         >共 {{ filteredTools.length }} 个工具，{{
-          categories.length
+          Object.keys(groupedTools).length
         }}
         个分类</span
       >
@@ -585,6 +559,28 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.search-input {
+  width: 300px;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: white;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #2563eb;
 }
 
 .page-description {

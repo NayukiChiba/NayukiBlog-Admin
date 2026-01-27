@@ -283,14 +283,16 @@ onMounted(() => {
       <button class="close-btn" @click="error = null">×</button>
     </div>
 
-    <!-- 搜索栏 -->
-    <div class="search-bar card">
-      <input
-        v-model="searchQuery"
-        type="text"
-        class="input"
-        placeholder="搜索书名或标签..."
-      />
+    <!-- 筛选栏 -->
+    <div class="filter-bar card">
+      <div class="filter-item">
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="input"
+          placeholder="搜索书名或标签..."
+        />
+      </div>
     </div>
 
     <!-- 书籍列表 -->
@@ -600,10 +602,17 @@ onMounted(() => {
   opacity: 1;
 }
 
-/* 搜索栏 */
-.search-bar {
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  gap: 1rem;
   padding: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.filter-item {
+  flex: 1;
+  max-width: 600px;
 }
 
 /* 书籍网格 */

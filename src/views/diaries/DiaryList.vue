@@ -81,9 +81,44 @@ const weatherIcons: Record<string, string> = {
   windy: "💨",
 };
 
+// 筛选：年月
+const selectedYear = ref("");
+const selectedMonth = ref("");
+
+// 获取所有年份
+const availableYears = computed(() => {
+  const years = new Set(
+    diaries.value.map((d) => new Date(d.date).getFullYear().toString())
+  );
+  return Array.from(years).sort((a, b) => Number(b) - Number(a));
+});
+
+// 获取所有月份（1-12）
+const availableMonths = computed(() => {
+  return Array.from({ length: 12 }, (_, i) => {
+    const month = (i + 1).toString().padStart(2, "0");
+    return { value: month, label: `${i + 1}月` };
+  });
+});
+
+// 筛选后的日记
+const filteredDiaries = computed(() => {
+  return diaries.value.filter((diary) => {
+    const diaryDate = new Date(diary.date);
+    const diaryYear = diaryDate.getFullYear().toString();
+    const diaryMonth = (diaryDate.getMonth() + 1).toString().padStart(2, "0");
+
+    const matchesYear = !selectedYear.value || diaryYear === selectedYear.value;
+    const matchesMonth =
+      !selectedMonth.value || diaryMonth === selectedMonth.value;
+
+    return matchesYear && matchesMonth;
+  });
+});
+
 // 按日期排序的日记
 const sortedDiaries = computed(() => {
-  return [...diaries.value].sort(
+  return [...filteredDiaries.value].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 });
@@ -287,9 +322,39 @@ onMounted(() => {
 
     <!-- 日记列表 -->
     <div class="diary-content">
+      <!-- 筛选栏 -->
+      <div class="filter-bar card">
+        <div class="filter-item">
+          <select v-model="selectedYear" class="input">
+            <option value="">所有年份</option>
+            <option v-for="year in availableYears" :key="year" :value="year">
+              {{ year }}年
+            </option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <select v-model="selectedMonth" class="input">
+            <option value="">所有月份</option>
+            <option
+              v-for="month in availableMonths"
+              :key="month.value"
+              :value="month.value"
+            >
+              {{ month.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
       <!-- 统计栏 -->
       <div class="stats-bar">
-        <span>共 {{ diaries.length }} 篇日记</span>
+        <span>共 {{ sortedDiaries.length }} 篇日记</span>
+        <span
+          v-if="sortedDiaries.length !== diaries.length"
+          class="stats-filtered"
+        >
+          (已筛选，共 {{ diaries.length }} 篇)
+        </span>
       </div>
 
       <!-- 加载状态 -->
@@ -510,11 +575,47 @@ onMounted(() => {
   background: #4f46e5;
 }
 
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filter-item {
+  flex: 1;
+  max-width: 200px;
+}
+
+.input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: white;
+  color: #1f2937;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  border-color: #6366f1;
+}
+
 /* 统计栏 */
 .stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 14px;
   color: #6b7280;
   margin-bottom: 24px;
+}
+
+.stats-filtered {
+  color: #9ca3af;
 }
 
 /* 日记时间线 */
