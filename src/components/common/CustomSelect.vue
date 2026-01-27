@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 
 interface Option {
   value: string;
@@ -24,6 +24,8 @@ const emit = defineEmits<{
 
 const isOpen = ref(false);
 const selectRef = ref<HTMLElement | null>(null);
+const triggerRef = ref<HTMLElement | null>(null);
+const dropdownStyle = ref<Record<string, string>>({});
 
 const selectedLabel = computed(() => {
   const option = props.options.find((opt) => opt.value === props.modelValue);
@@ -34,9 +36,44 @@ const isPlaceholder = computed(() => {
   return !props.options.find((opt) => opt.value === props.modelValue);
 });
 
-function toggleDropdown() {
+function updateDropdownPosition() {
+  if (!triggerRef.value) return;
+
+  const rect = triggerRef.value.getBoundingClientRect();
+  const dropdownHeight = 240; // max-height of dropdown
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+
+  // Determine if dropdown should open upward
+  const openUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+  if (openUpward) {
+    dropdownStyle.value = {
+      position: "fixed",
+      left: `${rect.left}px`,
+      bottom: `${window.innerHeight - rect.top + 6}px`,
+      width: `${rect.width}px`,
+      maxHeight: `${Math.min(dropdownHeight, spaceAbove - 10)}px`,
+    };
+  } else {
+    dropdownStyle.value = {
+      position: "fixed",
+      left: `${rect.left}px`,
+      top: `${rect.bottom + 6}px`,
+      width: `${rect.width}px`,
+      maxHeight: `${Math.min(dropdownHeight, spaceBelow - 10)}px`,
+    };
+  }
+}
+
+async function toggleDropdown() {
   if (props.disabled) return;
   isOpen.value = !isOpen.value;
+
+  if (isOpen.value) {
+    await nextTick();
+    updateDropdownPosition();
+  }
 }
 
 function selectOption(option: Option) {
@@ -46,6 +83,13 @@ function selectOption(option: Option) {
 
 function handleClickOutside(event: MouseEvent) {
   if (selectRef.value && !selectRef.value.contains(event.target as Node)) {
+    // Also check if click is on the dropdown (which is teleported)
+    const dropdown = document.querySelector(
+      ".custom-select-dropdown-teleported",
+    );
+    if (dropdown && dropdown.contains(event.target as Node)) {
+      return;
+    }
     isOpen.value = false;
   }
 }
@@ -56,14 +100,30 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
+function handleScroll() {
+  if (isOpen.value) {
+    updateDropdownPosition();
+  }
+}
+
+function handleResize() {
+  if (isOpen.value) {
+    updateDropdownPosition();
+  }
+}
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
   document.addEventListener("keydown", handleKeydown);
+  window.addEventListener("scroll", handleScroll, true);
+  window.addEventListener("resize", handleResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
   document.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("scroll", handleScroll, true);
+  window.removeEventListener("resize", handleResize);
 });
 </script>
 
@@ -73,7 +133,7 @@ onUnmounted(() => {
     class="custom-select"
     :class="{ open: isOpen, disabled: disabled }"
   >
-    <div class="select-trigger" @click="toggleDropdown">
+    <div ref="triggerRef" class="select-trigger" @click="toggleDropdown">
       <span class="select-value" :class="{ placeholder: isPlaceholder }">
         {{ selectedLabel }}
       </span>
@@ -94,34 +154,40 @@ onUnmounted(() => {
       </svg>
     </div>
 
-    <Transition name="dropdown">
-      <div v-if="isOpen" class="select-dropdown">
+    <Teleport to="body">
+      <Transition name="dropdown">
         <div
-          v-for="option in options"
-          :key="option.value"
-          class="select-option"
-          :class="{ selected: option.value === modelValue }"
-          @click="selectOption(option)"
+          v-if="isOpen"
+          class="select-dropdown custom-select-dropdown-teleported"
+          :style="dropdownStyle"
         >
-          <span class="option-label">{{ option.label }}</span>
-          <svg
-            v-if="option.value === modelValue"
-            class="option-check"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          <div
+            v-for="option in options"
+            :key="option.value"
+            class="select-option"
+            :class="{ selected: option.value === modelValue }"
+            @click="selectOption(option)"
           >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+            <span class="option-label">{{ option.label }}</span>
+            <svg
+              v-if="option.value === modelValue"
+              class="option-check"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -186,47 +252,47 @@ onUnmounted(() => {
 .custom-select.disabled .select-arrow {
   color: #94a3b8;
 }
+</style>
 
-.select-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
+<style>
+/* Global styles for teleported dropdown */
+.select-dropdown.custom-select-dropdown-teleported {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   box-shadow:
     0 10px 25px -5px rgba(0, 0, 0, 0.1),
     0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 9999;
   overflow: hidden;
-  max-height: 240px;
   overflow-y: auto;
 }
 
-.select-option {
+.select-dropdown.custom-select-dropdown-teleported .select-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
   cursor: pointer;
   transition: all 0.15s ease;
+  font-size: 14px;
+  color: #1f2937;
 }
 
-.select-option:hover {
+.select-dropdown.custom-select-dropdown-teleported .select-option:hover {
   background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
 }
 
-.select-option.selected {
+.select-dropdown.custom-select-dropdown-teleported .select-option.selected {
   background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
   color: white;
 }
 
-.option-label {
+.select-dropdown.custom-select-dropdown-teleported .option-label {
   flex: 1;
 }
 
-.option-check {
+.select-dropdown.custom-select-dropdown-teleported .option-check {
   flex-shrink: 0;
   margin-left: 8px;
 }
@@ -245,21 +311,21 @@ onUnmounted(() => {
 }
 
 /* Custom scrollbar for dropdown */
-.select-dropdown::-webkit-scrollbar {
+.select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar {
   width: 6px;
 }
 
-.select-dropdown::-webkit-scrollbar-track {
+.select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 3px;
 }
 
-.select-dropdown::-webkit-scrollbar-thumb {
+.select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
 
-.select-dropdown::-webkit-scrollbar-thumb:hover {
+.select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 </style>
