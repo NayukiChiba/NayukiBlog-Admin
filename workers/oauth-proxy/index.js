@@ -1,29 +1,7 @@
 /**
  * Cloudflare Workers OAuth Proxy
  * 用于 GitHub OAuth 的 code -> access_token 交换
- *
- * 部署步骤：
- * 1. 安装 wrangler: npm install -g wrangler
- * 2. 登录 Cloudflare: wrangler login
- * 3. 配置 secrets:
- *    wrangler secret put GITHUB_CLIENT_ID
- *    wrangler secret put GITHUB_CLIENT_SECRET
- * 4. 部署: wrangler deploy
  */
-
-interface Env {
-  GITHUB_CLIENT_ID: string
-  GITHUB_CLIENT_SECRET: string
-  ALLOWED_USERS?: string // 允许的 GitHub 用户名列表，用逗号分隔
-}
-
-interface GitHubTokenResponse {
-  access_token?: string
-  token_type?: string
-  scope?: string
-  error?: string
-  error_description?: string
-}
 
 // CORS 头部配置
 const corsHeaders = {
@@ -33,14 +11,14 @@ const corsHeaders = {
 }
 
 // 处理 OPTIONS 预检请求
-function handleOptions(): Response {
+function handleOptions() {
   return new Response(null, {
     headers: corsHeaders,
   })
 }
 
 // 创建 JSON 响应
-function jsonResponse(data: object, status = 200): Response {
+function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -51,12 +29,12 @@ function jsonResponse(data: object, status = 200): Response {
 }
 
 // 创建错误响应
-function errorResponse(message: string, status = 400): Response {
+function errorResponse(message, status = 400) {
   return jsonResponse({ error: true, message }, status)
 }
 
 // 获取 GitHub 用户信息
-async function getGitHubUser(accessToken: string): Promise<{ login: string }> {
+async function getGitHubUser(accessToken) {
   const response = await fetch('https://api.github.com/user', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -72,8 +50,8 @@ async function getGitHubUser(accessToken: string): Promise<{ login: string }> {
 }
 
 // 检查用户是否在白名单中
-function isUserAllowed(username: string, env: Env): boolean {
-  // 如果没有配置白名单，允许所有用户（向后兼容）
+function isUserAllowed(username, env) {
+  // 如果没有配置白名单，允许所有用户
   if (!env.ALLOWED_USERS) {
     return true
   }
@@ -83,10 +61,7 @@ function isUserAllowed(username: string, env: Env): boolean {
 }
 
 // 交换 GitHub OAuth code 获取 access_token
-async function exchangeCodeForToken(
-  code: string,
-  env: Env
-): Promise<GitHubTokenResponse> {
+async function exchangeCodeForToken(code, env) {
   const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: {
@@ -108,10 +83,7 @@ async function exchangeCodeForToken(
 }
 
 // 处理 /callback 路由
-async function handleCallback(
-  request: Request,
-  env: Env
-): Promise<Response> {
+async function handleCallback(request, env) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
 
@@ -156,8 +128,8 @@ async function handleCallback(
   }
 }
 
-// 处理 /health 路由（健康检查）
-function handleHealth(): Response {
+// 处理 /health 路由
+function handleHealth() {
   return jsonResponse({
     status: 'ok',
     service: 'nayuki-oauth-proxy',
@@ -167,11 +139,7 @@ function handleHealth(): Response {
 
 // 主入口
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    _ctx: ExecutionContext
-  ): Promise<Response> {
+  async fetch(request, env, ctx) {
     // 处理 CORS 预检
     if (request.method === 'OPTIONS') {
       return handleOptions()

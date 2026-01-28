@@ -2,7 +2,7 @@
 # 用于 GitHub OAuth 代理
 
 name = "nayuki-oauth-proxy"
-main = "index.ts"
+main = "index.js"
 compatibility_date = "2024-01-01"
 
 # Account ID（必填）
