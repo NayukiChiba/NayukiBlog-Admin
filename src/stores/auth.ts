@@ -64,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : '未知错误')
       logout()
+      throw err
     } finally {
       setLoading(false)
     }

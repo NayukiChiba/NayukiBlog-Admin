@@ -35,7 +35,7 @@ function handleLogin() {
     const authUrl = new URL("https://github.com/login/oauth/authorize");
     authUrl.searchParams.set("client_id", GITHUB_CLIENT_ID);
     authUrl.searchParams.set("redirect_uri", `${window.location.origin}/login`);
-    authUrl.searchParams.set("scope", "repo");
+    authUrl.searchParams.set("scope", "repo user");
     authUrl.searchParams.set("state", state);
 
     window.location.href = authUrl.toString();
@@ -43,6 +43,11 @@ function handleLogin() {
 
 // 处理 OAuth 回调
 async function handleOAuthCallback(code: string, state: string) {
+    // 防止重复请求
+    if (loading.value) {
+        return;
+    }
+
     loading.value = true;
     error.value = null;
 
@@ -60,8 +65,14 @@ async function handleOAuthCallback(code: string, state: string) {
         );
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || "获取访问令牌失败");
+            const responseText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(responseText);
+            } catch {
+                errorData = { message: responseText };
+            }
+            throw new Error(errorData.message || errorData.error || "获取访问令牌失败");
         }
 
         const data = await response.json();
@@ -101,8 +112,20 @@ onMounted(() => {
     }
 
     if (code && state) {
-        // 清除 URL 参数
+        // 检查是否已经处理过这个 code（防止重复请求）
+        const processedCode = sessionStorage.getItem("processed_oauth_code");
+        if (processedCode === code) {
+            window.history.replaceState({}, "", "/login");
+            return;
+        }
+
+        // 标记这个 code 为已处理
+        sessionStorage.setItem("processed_oauth_code", code);
+
+        // 立即清除 URL 参数（防止刷新时重复请求）
         window.history.replaceState({}, "", "/login");
+        
+        // 处理回调
         handleOAuthCallback(code, state);
     }
 });
