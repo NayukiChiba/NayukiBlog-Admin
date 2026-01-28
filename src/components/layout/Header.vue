@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useSidebarStore } from '@/stores/sidebar'
 
 const route = useRoute()
+const sidebarStore = useSidebarStore()
 
 // 页面标题映射
 const titleMap: Record<string, string> = {
@@ -40,8 +42,18 @@ const breadcrumbs = computed(() => {
 <template>
   <header class="header">
     <div class="header-left">
-      <!-- 面包屑 -->
-      <nav class="breadcrumb">
+      <!-- 汉堡菜单按钮（移动端） -->
+      <button class="menu-btn" @click="sidebarStore.toggle" title="菜单">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="header-info">
+        <!-- 面包屑 -->
+        <nav class="breadcrumb">
         <template v-for="(crumb, index) in breadcrumbs" :key="crumb.path">
           <router-link
             v-if="index < breadcrumbs.length - 1"
@@ -53,10 +65,11 @@ const breadcrumbs = computed(() => {
           <span v-else class="breadcrumb-current">{{ crumb.label }}</span>
           <span v-if="index < breadcrumbs.length - 1" class="breadcrumb-separator">/</span>
         </template>
-      </nav>
+        </nav>
 
-      <!-- 页面标题 -->
-      <h1 class="page-title">{{ pageTitle }}</h1>
+        <!-- 页面标题 -->
+        <h1 class="page-title">{{ pageTitle }}</h1>
+      </div>
     </div>
 
     <div class="header-right">
@@ -112,12 +125,43 @@ const breadcrumbs = computed(() => {
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: 1rem;
 }
 
 .header-left {
   display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 0.5rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.header-info {
+  display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .breadcrumb {
@@ -150,6 +194,9 @@ const breadcrumbs = computed(() => {
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-right {
@@ -176,5 +223,40 @@ const breadcrumbs = computed(() => {
 .header-btn:hover {
   background: #f1f5f9;
   color: #1e293b;
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+  .menu-btn {
+    display: flex;
+  }
+
+  .header {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .breadcrumb {
+    display: none;
+  }
+
+  .page-title {
+    font-size: 1.125rem;
+  }
+
+  .header-right {
+    gap: 0.25rem;
+  }
+
+  .header-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-btn svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 </style>

@@ -2,10 +2,12 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useSidebarStore } from '@/stores/sidebar'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const sidebarStore = useSidebarStore()
 
 // 导航菜单项
 const menuItems = [
@@ -27,10 +29,23 @@ function handleLogout() {
   authStore.logout()
   router.push('/login')
 }
+
+// 点击菜单项时关闭 Sidebar（移动端）
+function handleMenuClick() {
+  sidebarStore.close()
+}
 </script>
 
 <template>
-  <aside class="sidebar">
+  <!-- 遮罩层（移动端） -->
+  <div
+    v-if="sidebarStore.isOpen"
+    class="sidebar-overlay"
+    @click="sidebarStore.close"
+  ></div>
+
+  <!-- 侧边栏 -->
+  <aside :class="['sidebar', { open: sidebarStore.isOpen }]">
     <!-- Logo -->
     <div class="sidebar-header">
       <div class="logo">
@@ -46,6 +61,7 @@ function handleLogout() {
           <router-link
             :to="item.path"
             :class="['nav-item', { active: activeMenu === item.name }]"
+            @click="handleMenuClick"
           >
             <!-- 图标 -->
             <span class="nav-icon">
@@ -125,6 +141,26 @@ function handleLogout() {
 </template>
 
 <style scoped>
+/* 遮罩层 */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 侧边栏 */
 .sidebar {
   width: 260px;
   height: 100vh;
@@ -136,6 +172,7 @@ function handleLogout() {
   left: 0;
   top: 0;
   z-index: 100;
+  transition: transform 0.3s ease;
 }
 
 .sidebar-header {
@@ -281,5 +318,21 @@ function handleLogout() {
 .logout-btn:hover {
   background: #fef2f2;
   color: #ef4444;
+}
+
+/* 响应式：移动端 */
+@media (max-width: 1024px) {
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
 }
 </style>

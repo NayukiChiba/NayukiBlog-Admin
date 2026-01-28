@@ -1015,8 +1015,26 @@ onMounted(() => {
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .header-right {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .filter-bar {
@@ -1034,6 +1052,28 @@ onMounted(() => {
 
   .tool-actions {
     opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-description {
+    font-size: 0.875rem;
+  }
+
+  .modal {
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+
+  .modal-footer {
+    padding: 0.875rem 1.25rem;
   }
 }
 </style>

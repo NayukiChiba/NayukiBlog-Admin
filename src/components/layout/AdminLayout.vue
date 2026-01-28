@@ -45,6 +45,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: calc(100% - 260px);
 }
 
 .main-content {
@@ -53,10 +54,18 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
-/* 响应式：小屏幕隐藏侧边栏 */
+/* 响应式：移动端 */
 @media (max-width: 1024px) {
   .main-wrapper {
     margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* 小屏幕优化 */
+@media (max-width: 640px) {
+  .main-content {
+    padding: 1rem;
   }
 }
 </style>
