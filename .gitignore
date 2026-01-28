@@ -45,3 +45,6 @@ workers/*/node_modules/
 temp.md
 plan.md
 TODO.md
+
+*.ps1
+.wrangler

@@ -14,6 +14,7 @@
 interface Env {
   GITHUB_CLIENT_ID: string
   GITHUB_CLIENT_SECRET: string
+  ALLOWED_USERS?: string // 允许的 GitHub 用户名列表，用逗号分隔
 }
 
 interface GitHubTokenResponse {
@@ -52,6 +53,33 @@ function jsonResponse(data: object, status = 200): Response {
 // 创建错误响应
 function errorResponse(message: string, status = 400): Response {
   return jsonResponse({ error: true, message }, status)
+}
+
+// 获取 GitHub 用户信息
+async function getGitHubUser(accessToken: string): Promise<{ login: string }> {
+  const response = await fetch('https://api.github.com/user', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Accept': 'application/vnd.github.v3+json',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to get user info: ${response.status}`)
+  }
+
+  return response.json()
+}
+
+// 检查用户是否在白名单中
+function isUserAllowed(username: string, env: Env): boolean {
+  // 如果没有配置白名单，允许所有用户（向后兼容）
+  if (!env.ALLOWED_USERS) {
+    return true
+  }
+
+  const allowedUsers = env.ALLOWED_USERS.split(',').map(u => u.trim().toLowerCase())
+  return allowedUsers.includes(username.toLowerCase())
 }
 
 // 交换 GitHub OAuth code 获取 access_token
@@ -103,6 +131,15 @@ async function handleCallback(
 
     if (!tokenData.access_token) {
       return errorResponse('Failed to obtain access token', 500)
+    }
+
+    // 验证用户是否在白名单中
+    const userInfo = await getGitHubUser(tokenData.access_token)
+    if (!isUserAllowed(userInfo.login, env)) {
+      return errorResponse(
+        `用户 ${userInfo.login} 无权访问此管理面板`,
+        403
+      )
     }
 
     return jsonResponse({

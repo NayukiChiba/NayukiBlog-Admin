@@ -127,7 +127,15 @@ class GitHubAPI {
         "content" in response.data &&
         typeof response.data.content === "string"
       ) {
-        const content = atob(response.data.content);
+        // 正确的 UTF-8 解码方式
+        const base64 = response.data.content.replace(/\n/g, '');
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const content = new TextDecoder('utf-8').decode(bytes);
+        
         return {
           content,
           sha: response.data.sha,
@@ -152,12 +160,16 @@ class GitHubAPI {
   ): Promise<string> {
     this.checkInit();
 
+    // 正确的 UTF-8 编码方式
+    const utf8Bytes = new TextEncoder().encode(content);
+    const base64 = btoa(String.fromCharCode(...utf8Bytes));
+
     const response = await this.octokit!.repos.createOrUpdateFileContents({
       owner: this.owner,
       repo: this.repo,
       path,
       message,
-      content: btoa(unescape(encodeURIComponent(content))),
+      content: base64,
       branch: this.branch,
       ...(sha && { sha }),
     });

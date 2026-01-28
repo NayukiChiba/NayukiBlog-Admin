@@ -5,6 +5,11 @@ name = "nayuki-oauth-proxy"
 main = "index.ts"
 compatibility_date = "2024-01-01"
 
+# Account ID（必填）
+# 获取方式：https://dash.cloudflare.com/ → 右侧 "Account ID"
+# 如果使用环境变量，可以不填：export CLOUDFLARE_ACCOUNT_ID="your_account_id"
+# account_id = "your_account_id_here"
+
 # 开发环境配置
 [dev]
 port = 8787
@@ -14,23 +19,19 @@ local_protocol = "http"
 # GITHUB_CLIENT_ID - GitHub OAuth App 的 Client ID
 # GITHUB_CLIENT_SECRET - GitHub OAuth App 的 Client Secret
 
-# 部署步骤：
-# 1. 安装 wrangler: npm install -g wrangler
-# 2. 登录 Cloudflare: wrangler login
-# 3. 配置 secrets:
-#    wrangler secret put GITHUB_CLIENT_ID
-#    wrangler secret put GITHUB_CLIENT_SECRET
-# 4. 部署: wrangler deploy
-# 5. 记录 Worker URL 并配置到前端 VITE_OAUTH_PROXY_URL
+# 部署步骤（使用 API Token）：
+# 1. 获取 Cloudflare API Token: https://dash.cloudflare.com/profile/api-tokens
+# 2. 设置环境变量:
+#    export CLOUDFLARE_API_TOKEN="your_token"
+#    export CLOUDFLARE_ACCOUNT_ID="your_account_id"
+# 3. 安装依赖: npm install
+# 4. 配置 secrets:
+#    npx wrangler secret put GITHUB_CLIENT_ID
+#    npx wrangler secret put GITHUB_CLIENT_SECRET
+# 5. 部署: npx wrangler deploy
+# 6. 记录 Worker URL 并配置到前端 VITE_OAUTH_PROXY_URL
 
 # 自定义域名（可选）
 # [routes]
 # pattern = "oauth.yourdomain.com/*"
 # zone_name = "yourdomain.com"
-
-# 环境配置
-[env.production]
-name = "nayuki-oauth-proxy"
-
-[env.staging]
-name = "nayuki-oauth-proxy-staging"

@@ -351,9 +351,6 @@ onMounted(() => {
           class="category-group"
         >
           <h3 class="category-title">
-            <span class="category-icon">
-              {{ categoryTools[0]?.icon || "📁" }}
-            </span>
             {{ category }}
             <span class="category-count">{{ categoryTools.length }}</span>
           </h3>
