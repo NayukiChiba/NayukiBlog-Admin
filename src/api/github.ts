@@ -1,9 +1,9 @@
 import { Octokit } from "@octokit/rest";
 
-// 配置
-const REPO_OWNER = import.meta.env.VITE_GITHUB_OWNER || "NayukiChiba";
-const REPO_NAME = import.meta.env.VITE_GITHUB_REPO || "NayukiBlog";
-const BRANCH = import.meta.env.VITE_GITHUB_BRANCH || "static-blog";
+// 配置（必须通过环境变量设置）
+const REPO_OWNER = import.meta.env.VITE_GITHUB_OWNER || "";
+const REPO_NAME = import.meta.env.VITE_GITHUB_REPO || "";
+const BRANCH = import.meta.env.VITE_GITHUB_BRANCH || "main";
 
 // 文件路径常量
 const PATHS = {
