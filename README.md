@@ -1,17 +1,17 @@
-# Blog Admin
+# NayukiBlog Admin
 
 基于 Vue 3 + TypeScript 的博客管理后台，通过 GitHub API 直接管理博客内容。
 
 ## 功能
 
-- 📝 文章管理 - Markdown 编辑器，实时预览
-- 📔 日记管理 - 时间线展示，支持图片
-- 📋 待办管理 - 短期/中期/长期目标分类
-- 🔧 工具管理 - 收藏常用工具和资源
-- 📚 书籍管理 - 记录阅读进度
-- 🖼️ 图库管理 - 管理博客图片
-- 🚀 项目管理 - 展示个人项目
-- 🔐 GitHub OAuth - 安全认证，用户白名单
+- **文章管理** - Markdown 编辑器，实时预览
+- **日记管理** - 时间线展示，支持图片
+- **待办管理** - 短期/中期/长期目标分类
+- **工具管理** - 收藏常用工具和资源
+- **书籍管理** - 记录阅读进度
+- **图库管理** - 管理博客图片
+- **项目管理** - 展示个人项目
+- **GitHub OAuth** - 安全认证，用户白名单
 
 ---
 
@@ -70,22 +70,9 @@ npm run dev
 
 ### 架构说明
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    EdgeOne Pages                             │
-│  (前端托管，只需要 CLIENT_ID，不需要 SECRET)                 │
-│  环境变量: VITE_GITHUB_CLIENT_ID, VITE_OAUTH_PROXY_URL      │
-└────────────────────────┬────────────────────────────────────┘
-                         │ 调用
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│               Cloudflare Worker                              │
-│  (OAuth 代理，安全存储 CLIENT_SECRET)                        │
-│  Secrets: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET             │
-└─────────────────────────────────────────────────────────────┘
-```
+![Oauth](https://img.yumeko.site/file/articles/NayukiBlog/Oauth.png)
 
-> 💡 CF Worker 和 EdgeOne 使用**同一个** GitHub OAuth App 的凭证。
+> 提示: CF Worker 和 EdgeOne 使用**同一个** GitHub OAuth App 的凭证。
 
 ### 1. 创建生产环境 GitHub OAuth App
 
@@ -111,7 +98,7 @@ npm run deploy
 
 ### 3. 在 EdgeOne 配置环境变量
 
-登录 [EdgeOne 控制台](https://console.cloud.tencent.com/edgeone) → Pages 项目 → 设置 → 环境变量：
+登录 [EdgeOne 控制台](https://console.cloud.tencent.com/edgeone) -> Pages 项目 -> 设置 -> 环境变量：
 
 | 环境变量                | 值                                |
 | ----------------------- | --------------------------------- |
@@ -144,11 +131,11 @@ npm run deploy
 
 | 变量名                  | 必填 | 说明                   |
 | ----------------------- | ---- | ---------------------- |
-| `VITE_GITHUB_CLIENT_ID` | ✅   | GitHub OAuth Client ID |
-| `VITE_OAUTH_PROXY_URL`  | ✅   | OAuth Worker 代理地址  |
-| `VITE_GITHUB_OWNER`     | ✅   | GitHub 仓库拥有者      |
-| `VITE_GITHUB_REPO`      | ✅   | GitHub 仓库名          |
-| `VITE_GITHUB_BRANCH`    | ❌   | Git 分支（默认 main）  |
+| `VITE_GITHUB_CLIENT_ID` | 是   | GitHub OAuth Client ID |
+| `VITE_OAUTH_PROXY_URL`  | 是   | OAuth Worker 代理地址  |
+| `VITE_GITHUB_OWNER`     | 是   | GitHub 仓库拥有者      |
+| `VITE_GITHUB_REPO`      | 是   | GitHub 仓库名          |
+| `VITE_GITHUB_BRANCH`    | 否   | Git 分支（默认 main）  |
 
 ---
 
