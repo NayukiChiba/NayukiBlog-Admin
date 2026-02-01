@@ -200,7 +200,7 @@ async function deleteProject(project: Project) {
     if (authStore.token && dataSha.value) {
       pendingChangesStore.addChange({
         path: 'src/data/projects.json',
-        type: 'delete',
+        type: 'update',
         content: JSON.stringify({ projects: projects.value }, null, 2),
         sha: dataSha.value,
         description: `📁 删除项目: ${project.name}`,

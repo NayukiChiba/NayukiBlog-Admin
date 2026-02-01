@@ -190,7 +190,7 @@ async function deleteBook(book: Book) {
     if (authStore.token && dataSha.value) {
       pendingChangesStore.addChange({
         path: 'src/data/books.json',
-        type: 'delete',
+        type: 'update',
         content: JSON.stringify({ books: books.value }, null, 2),
         sha: dataSha.value,
         description: `📚 删除书籍: ${book.title}`,

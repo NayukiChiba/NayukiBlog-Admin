@@ -236,7 +236,7 @@ async function deleteDiary(diary: Diary) {
     if (authStore.token && dataSha.value) {
       pendingChangesStore.addChange({
         path: 'src/data/diaries.json',
-        type: 'delete',
+        type: 'update',
         content: JSON.stringify({ diaries: diaries.value }, null, 2),
         sha: dataSha.value,
         description: "📔 删除日记",

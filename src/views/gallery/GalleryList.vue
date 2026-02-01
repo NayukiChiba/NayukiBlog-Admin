@@ -217,7 +217,7 @@ async function deleteItem(item: GalleryItem) {
     if (authStore.token) {
       pendingChangesStore.addChange({
         path: 'src/data/gallery.json',
-        type: 'delete',
+        type: 'update',
         content: JSON.stringify({ gallery: gallery.value }, null, 2),
         sha: dataSha.value,
         description: `🗑️ 删除图片: ${item.title}`,

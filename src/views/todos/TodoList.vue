@@ -278,7 +278,7 @@ async function deleteTodo(todo: Todo) {
     if (authStore.token) {
       pendingChangesStore.addChange({
         path: 'src/data/todos.json',
-        type: 'delete',
+        type: 'update',
         content: JSON.stringify({ todos: todos.value }, null, 2),
         sha: dataSha.value,
         description: `🗑️ 删除待办: ${todo.task}`,

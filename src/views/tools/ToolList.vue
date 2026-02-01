@@ -208,7 +208,7 @@ async function deleteTool(tool: Tool) {
     if (authStore.token) {
       pendingChangesStore.addChange({
         path: 'src/data/tools.json',
-        type: 'delete',
+        type: 'update',
         content: JSON.stringify({ tools: tools.value }, null, 2),
         sha: dataSha.value,
         description: `🗑️ 删除工具: ${tool.name}`,
