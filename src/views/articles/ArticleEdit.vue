@@ -20,8 +20,17 @@ const authStore = useAuthStore();
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
 
+// 获取完整的 slug 路径（支持多级目录）
+const fullSlug = computed(() => {
+  const slug = route.params.slug;
+  if (Array.isArray(slug)) {
+    return slug.join("/");
+  }
+  return slug as string || "";
+});
+
 // 是否是编辑模式
-const isEditMode = computed(() => !!route.params.slug);
+const isEditMode = computed(() => !!fullSlug.value);
 const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新建文章"));
 
 // 状态
@@ -32,17 +41,20 @@ const successMessage = ref<string | null>(null);
 const originalSha = ref<string | undefined>(undefined);
 
 // 表单数据
-const form = ref<Omit<Article, "sha"> & { sha?: string }>({
-  slug: "",
-  title: "",
-  date: new Date().toISOString().split("T")[0],
-  category: "技术",
-  tags: [],
-  description: "",
-  image: "https://img.yumeko.site/file/wife/早坂爱.jpg",
-  status: "public",
-  content: "",
-});
+const form = ref<Omit<Article, "sha"> & { sha?: string }>(
+  {
+    slug: "",
+    title: "",
+    date: new Date().toISOString().split("T")[0],
+    category: "技术",
+    tags: [],
+    description: "",
+    image: "https://img.yumeko.site/file/wife/早坂爱.jpg",
+    status: "public",
+    content: "",
+    folder: "",
+  },
+);
 
 // 标签输入
 const tagInput = ref("");
@@ -184,7 +196,7 @@ async function fetchArticle() {
   error.value = null;
 
   try {
-    const slug = route.params.slug as string;
+    const slug = fullSlug.value;
 
     githubAPI.init(authStore.token);
     const article = await githubAPI.getArticle(slug);
@@ -200,6 +212,7 @@ async function fetchArticle() {
         image: article.image,
         status: article.status,
         content: article.content,
+        folder: article.folder || "",
       };
       originalSha.value = article.sha;
     } else {
@@ -238,8 +251,20 @@ async function saveArticle() {
     if (authStore.token) {
       githubAPI.init(authStore.token);
 
+      // 从完整 slug 中提取文件名和文件夹
+      const fullSlugValue = form.value.slug;
+      let folder = form.value.folder || "";
+      let slugName = fullSlugValue;
+      
+      // 如果 slug 包含路径分隔符，提取文件夹和文件名
+      if (fullSlugValue.includes("/")) {
+        const lastSlashIndex = fullSlugValue.lastIndexOf("/");
+        folder = fullSlugValue.substring(0, lastSlashIndex);
+        slugName = fullSlugValue.substring(lastSlashIndex + 1);
+      }
+
       const articleData: Article = {
-        slug: form.value.slug,
+        slug: slugName, // 只使用文件名部分
         title: form.value.title.trim(),
         date: form.value.date,
         category: form.value.category,
@@ -249,6 +274,7 @@ async function saveArticle() {
         status: form.value.status,
         content: form.value.content,
         sha: originalSha.value,
+        folder, // 传递文件夹路径
       };
 
       await githubAPI.saveArticle(articleData, !isEditMode.value);

@@ -28,6 +28,7 @@ export interface Article {
   status: "public" | "draft" | "private";
   content: string;
   sha?: string;
+  folder?: string; // 文章所在的子文件夹路径（相对于 blog 目录）
 }
 
 export interface Diary {
@@ -191,10 +192,12 @@ class GitHubAPI {
     });
   }
 
-  // 列出目录下的文件
+  // 列出目录下的文件（支持递归获取子文件夹）
   async listFiles(
     path: string,
-  ): Promise<Array<{ name: string; path: string; sha: string }>> {
+    recursive = false,
+    excludeUnderscoreFolders = true, // 排除 _ 开头的文件夹
+  ): Promise<Array<{ name: string; path: string; sha: string; type: "dir" | "file" | "submodule" | "symlink" }>> {
     this.checkInit();
 
     const response = await this.octokit!.repos.getContent({
@@ -205,13 +208,32 @@ class GitHubAPI {
     });
 
     if (Array.isArray(response.data)) {
-      return response.data
-        .filter((item) => item.type === "file")
-        .map((item) => ({
-          name: item.name,
-          path: item.path,
-          sha: item.sha,
-        }));
+      const items = response.data.map((item) => ({
+        name: item.name,
+        path: item.path,
+        sha: item.sha,
+        type: item.type as "dir" | "file" | "submodule" | "symlink",
+      }));
+
+      if (recursive) {
+        // 递归获取子文件夹中的文件
+        const directories = items.filter((item) => {
+          if (item.type !== "dir") return false;
+          // 排除 _ 开头的文件夹
+          if (excludeUnderscoreFolders && item.name.startsWith("_")) return false;
+          return true;
+        });
+        const files = items.filter((item) => item.type === "file");
+
+        for (const dir of directories) {
+          const subFiles = await this.listFiles(dir.path, true, excludeUnderscoreFolders);
+          files.push(...subFiles);
+        }
+
+        return files;
+      }
+
+      return items;
     }
 
     return [];
@@ -219,16 +241,21 @@ class GitHubAPI {
 
   // ==================== 文章管理 ====================
 
-  // 获取所有文章
+  // 获取所有文章（包括子文件夹）
   async getArticles(): Promise<Article[]> {
-    const files = await this.listFiles(PATHS.articles);
+    const files = await this.listFiles(PATHS.articles, true); // 递归获取
     const articles: Article[] = [];
 
     for (const file of files) {
       if (file.name.endsWith(".md")) {
         try {
           const { content, sha } = await this.getFileContent(file.path);
-          const article = this.parseMarkdown(content, file.name, sha);
+          // 计算相对于 blog 目录的文件夹路径
+          const relativePath = file.path.replace(PATHS.articles + "/", "");
+          const folderPath = relativePath.includes("/")
+            ? relativePath.substring(0, relativePath.lastIndexOf("/"))
+            : "";
+          const article = this.parseMarkdown(content, file.name, sha, folderPath);
           articles.push(article);
         } catch (error) {
           console.error(`Failed to parse article: ${file.name}`, error);
@@ -242,22 +269,31 @@ class GitHubAPI {
     );
   }
 
-  // 获取单篇文章
+  // 获取单篇文章（slug 可以包含文件夹路径，如 "folder/subfolder/article-name"）
   async getArticle(slug: string): Promise<Article | null> {
     const path = `${PATHS.articles}/${slug}.md`;
 
     try {
       const { content, sha } = await this.getFileContent(path);
-      return this.parseMarkdown(content, `${slug}.md`, sha);
+      // 提取文件夹路径
+      const folderPath = slug.includes("/")
+        ? slug.substring(0, slug.lastIndexOf("/"))
+        : "";
+      const filename = slug.includes("/")
+        ? slug.substring(slug.lastIndexOf("/") + 1) + ".md"
+        : `${slug}.md`;
+      return this.parseMarkdown(content, filename, sha, folderPath);
     } catch (error) {
       return null;
     }
   }
 
-  // 保存文章
+  // 保存文章（支持子文件夹）
   async saveArticle(article: Article, isNew = false): Promise<void> {
     const filename = article.slug || this.generateSlug(article.title);
-    const path = `${PATHS.articles}/${filename}.md`;
+    // 如果有 folder 属性，则保存到对应的子文件夹
+    const folderPrefix = article.folder ? `${article.folder}/` : "";
+    const path = `${PATHS.articles}/${folderPrefix}${filename}.md`;
     const content = this.generateMarkdown(article);
     const message = isNew
       ? `📝 新建文章: ${article.title}`
@@ -271,10 +307,13 @@ class GitHubAPI {
     );
   }
 
-  // 删除文章
+  // 删除文章（slug 可以包含文件夹路径，如 "folder/subfolder/article-name"）
   async deleteArticle(slug: string, sha: string): Promise<void> {
     const path = `${PATHS.articles}/${slug}.md`;
-    await this.deleteFile(path, `🗑️ 删除文章: ${slug}`, sha);
+    const displayName = slug.includes("/")
+      ? slug.substring(slug.lastIndexOf("/") + 1)
+      : slug;
+    await this.deleteFile(path, `🗑️ 删除文章: ${displayName}`, sha);
   }
 
   // 解析 Markdown 文件
@@ -282,14 +321,17 @@ class GitHubAPI {
     content: string,
     filename: string,
     sha: string,
+    folder = "",
   ): Article {
-    const slug = filename.replace(".md", "");
+    const baseSlug = filename.replace(".md", "");
+    // slug 包含完整路径（用于 getArticle 和 deleteArticle）
+    const slug = folder ? `${folder}/${baseSlug}` : baseSlug;
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
     if (!frontmatterMatch) {
       return {
         slug,
-        title: slug,
+        title: baseSlug,
         date: new Date().toISOString().split("T")[0],
         category: "",
         tags: [],
@@ -298,6 +340,7 @@ class GitHubAPI {
         status: "draft",
         content: content,
         sha,
+        folder,
       };
     }
 
@@ -334,6 +377,7 @@ class GitHubAPI {
       status: (getValue("status") as Article["status"]) || "public",
       content: body,
       sha,
+      folder,
     };
   }
 
@@ -499,7 +543,7 @@ status: ${article.status}
     try {
       const [articles, diaries, projects, books, gallery, todos] =
         await Promise.all([
-          this.listFiles(PATHS.articles).then(
+          this.listFiles(PATHS.articles, true).then(
             (files) => files.filter((f) => f.name.endsWith(".md")).length,
           ),
           this.getDiaries().then((r) => r.diaries.length),

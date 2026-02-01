@@ -46,7 +46,8 @@ const router = createRouter({
       meta: { requiresAuth: true, title: "新建文章" },
     },
     {
-      path: "/articles/:slug",
+      // 支持多级路径的 slug，如 folder/subfolder/article-name
+      path: "/articles/:slug+",
       name: "article-edit",
       component: () => import("@/views/articles/ArticleEdit.vue"),
       meta: { requiresAuth: true, title: "编辑文章" },
