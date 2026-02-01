@@ -502,7 +502,7 @@ onMounted(() => {
 
 <style scoped>
 .article-list {
-  max-width: 1200px;
+  width: 100%;
 }
 
 .page-header {
@@ -587,6 +587,7 @@ onMounted(() => {
 .table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .table th,
@@ -594,6 +595,35 @@ onMounted(() => {
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+/* 列宽分配 */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 40%;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 15%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 12%;
+  white-space: nowrap;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 18%;
+  white-space: nowrap;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 15%;
 }
 
 .table th {
@@ -615,20 +645,23 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .article-title {
   font-weight: 500;
   color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .article-desc {
   font-size: 0.75rem;
   color: #64748b;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .article-tags {
@@ -657,15 +690,20 @@ onMounted(() => {
 .date {
   font-size: 0.875rem;
   color: #64748b;
+  white-space: nowrap;
 }
 
 /* 状态徽章 */
 .badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
+  white-space: nowrap;
+  min-width: 60px;
 }
 
 .badge-success {

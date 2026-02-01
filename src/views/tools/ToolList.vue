@@ -548,7 +548,7 @@ onMounted(() => {
 
 <style scoped>
 .tool-list {
-  max-width: 1200px;
+  width: 100%;
 }
 
 .page-header {

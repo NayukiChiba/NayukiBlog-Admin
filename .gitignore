@@ -48,3 +48,6 @@ TODO.md
 
 *.ps1
 .wrangler
+
+.github
+.shared

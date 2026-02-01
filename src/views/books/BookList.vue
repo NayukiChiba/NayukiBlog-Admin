@@ -506,7 +506,7 @@ onMounted(() => {
 
 <style scoped>
 .book-list {
-  max-width: 1200px;
+  width: 100%;
 }
 
 .page-header {
