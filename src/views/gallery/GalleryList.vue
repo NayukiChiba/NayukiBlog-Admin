@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type GalleryItem } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -174,21 +176,23 @@ async function saveItem() {
       }
     }
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token) {
-      const message = isNewItem.value
+      const description = isNewItem.value
         ? `🖼️ 添加图片: ${itemData.title}`
         : `🖼️ 更新图片: ${itemData.title}`;
-      dataSha.value = await githubAPI.saveGallery(
-        gallery.value,
-        dataSha.value,
-        message,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/gallery.json',
+        type: isNewItem.value ? 'create' : 'update',
+        content: JSON.stringify({ gallery: gallery.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
 
     successMessage.value = isNewItem.value
-      ? "图片添加成功！"
-      : "图片更新成功！";
+      ? "图片添加成功（待提交）"
+      : "图片更新成功（待提交）";
     setTimeout(() => {
       successMessage.value = null;
     }, 3000);
@@ -209,16 +213,18 @@ async function deleteItem(item: GalleryItem) {
   try {
     gallery.value = gallery.value.filter((i) => i.id !== item.id);
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token) {
-      dataSha.value = await githubAPI.saveGallery(
-        gallery.value,
-        dataSha.value,
-        `🗑️ 删除图片: ${item.title}`,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/gallery.json',
+        type: 'delete',
+        content: JSON.stringify({ gallery: gallery.value }, null, 2),
+        sha: dataSha.value,
+        description: `🗑️ 删除图片: ${item.title}`,
+      });
     }
 
-    successMessage.value = "图片删除成功！";
+    successMessage.value = "图片删除成功（待提交）";
     setTimeout(() => {
       successMessage.value = null;
     }, 3000);

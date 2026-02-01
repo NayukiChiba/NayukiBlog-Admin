@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Book } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -152,19 +154,22 @@ async function saveBook() {
       }
     }
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token && dataSha.value) {
-      const message = isNewBook.value
+      const description = isNewBook.value
         ? `📚 新增书籍: ${form.value.title}`
         : `📚 更新书籍: ${form.value.title}`;
-      dataSha.value = await githubAPI.saveBooks(
-        books.value,
-        dataSha.value,
-        message,
-      );
+      
+      pendingChangesStore.addChange({
+        path: 'src/data/books.json',
+        type: isNewBook.value ? 'create' : 'update',
+        content: JSON.stringify({ books: books.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
 
-    successMessage.value = isNewBook.value ? "书籍已添加" : "书籍已更新";
+    successMessage.value = isNewBook.value ? "书籍已添加（待提交）" : "书籍已更新（待提交）";
     setTimeout(() => (successMessage.value = null), 3000);
     closeModal();
   } catch (err) {
@@ -181,15 +186,18 @@ async function deleteBook(book: Book) {
   try {
     books.value = books.value.filter((b) => b.id !== book.id);
 
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token && dataSha.value) {
-      dataSha.value = await githubAPI.saveBooks(
-        books.value,
-        dataSha.value,
-        `📚 删除书籍: ${book.title}`,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/books.json',
+        type: 'delete',
+        content: JSON.stringify({ books: books.value }, null, 2),
+        sha: dataSha.value,
+        description: `📚 删除书籍: ${book.title}`,
+      });
     }
 
-    successMessage.value = "书籍已删除";
+    successMessage.value = "书籍已删除（待提交）";
     setTimeout(() => (successMessage.value = null), 3000);
   } catch (err) {
     error.value = err instanceof Error ? err.message : "删除失败";

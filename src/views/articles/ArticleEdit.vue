@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Article } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import {
@@ -16,6 +17,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -277,11 +279,27 @@ async function saveArticle() {
         folder, // 传递文件夹路径
       };
 
-      await githubAPI.saveArticle(articleData, !isEditMode.value);
+      // 生成文件路径和 Markdown 内容
+      const folderPrefix = folder ? `${folder}/` : '';
+      const path = `src/content/blog/${folderPrefix}${slugName}.md`;
+      const markdownContent = githubAPI.generateMarkdownContent(articleData);
+      
+      // 添加到待提交变更（不立即保存到 GitHub）
+      const description = isEditMode.value
+        ? `✏️ 更新文章: ${articleData.title}`
+        : `📝 新建文章: ${articleData.title}`;
+      
+      pendingChangesStore.addChange({
+        path,
+        type: isEditMode.value ? 'update' : 'create',
+        content: markdownContent,
+        sha: originalSha.value || '',
+        description,
+      });
 
       successMessage.value = isEditMode.value
-        ? "文章更新成功！"
-        : "文章创建成功！";
+        ? "文章更新成功（待提交）"
+        : "文章创建成功（待提交）";
 
       // 延迟跳转
       setTimeout(() => {

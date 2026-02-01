@@ -89,6 +89,23 @@ export interface Tool {
   status: string;
 }
 
+// Git 变更文件类型
+export interface ChangedFile {
+  filename: string;
+  status: "added" | "modified" | "removed" | "renamed";
+  additions: number;
+  deletions: number;
+  patch?: string;
+}
+
+// 批量变更项
+export interface BatchChange {
+  path: string;
+  type: "create" | "update" | "delete";
+  content?: string;
+  sha?: string;
+}
+
 // GitHub API 类
 class GitHubAPI {
   private octokit: Octokit | null = null;
@@ -359,7 +376,7 @@ class GitHubAPI {
     // 如果有 folder 属性，则保存到对应的子文件夹
     const folderPrefix = article.folder ? `${article.folder}/` : "";
     const path = `${PATHS.articles}/${folderPrefix}${filename}.md`;
-    const content = this.generateMarkdown(article);
+    const content = this.generateMarkdownContent(article);
     const message = isNew
       ? `📝 新建文章: ${article.title}`
       : `✏️ 更新文章: ${article.title}`;
@@ -447,7 +464,8 @@ class GitHubAPI {
   }
 
   // 生成 Markdown 文件
-  private generateMarkdown(article: Article): string {
+  // 生成 Markdown 内容（公开方法，供 pendingChangesStore 使用）
+  generateMarkdownContent(article: Article): string {
     const frontmatter = `---
 title: ${article.title}
 date: ${article.date}
@@ -628,6 +646,171 @@ status: ${article.status}
         books: 0,
         gallery: 0,
         todos: 0,
+      };
+    }
+  }
+
+  // ==================== Git 操作 ====================
+
+  // 获取最近的提交记录
+  async getRecentCommits(count = 10): Promise<Array<{
+    sha: string;
+    message: string;
+    author: string;
+    date: string;
+  }>> {
+    this.checkInit();
+
+    const response = await this.octokit!.repos.listCommits({
+      owner: this.owner,
+      repo: this.repo,
+      sha: this.branch,
+      per_page: count,
+    });
+
+    return response.data.map((commit) => ({
+      sha: commit.sha,
+      message: commit.commit.message,
+      author: commit.commit.author?.name || "Unknown",
+      date: commit.commit.author?.date || "",
+    }));
+  }
+
+  // 获取两个提交之间的差异（用于查看未推送的变更）
+  async getCommitDiff(baseSha: string, headSha: string): Promise<ChangedFile[]> {
+    this.checkInit();
+
+    const response = await this.octokit!.repos.compareCommits({
+      owner: this.owner,
+      repo: this.repo,
+      base: baseSha,
+      head: headSha,
+    });
+
+    return (response.data.files || []).map((file) => ({
+      filename: file.filename,
+      status: file.status as ChangedFile["status"],
+      additions: file.additions,
+      deletions: file.deletions,
+      patch: file.patch,
+    }));
+  }
+
+  // 获取仓库的最新提交 SHA
+  async getLatestCommitSha(): Promise<string> {
+    this.checkInit();
+
+    const response = await this.octokit!.repos.getBranch({
+      owner: this.owner,
+      repo: this.repo,
+      branch: this.branch,
+    });
+
+    return response.data.commit.sha;
+  }
+
+  // 获取仓库信息
+  getRepoInfo() {
+    return {
+      owner: this.owner,
+      repo: this.repo,
+      branch: this.branch,
+    };
+  }
+
+  // ==================== 批量提交 ====================
+
+  // 批量提交多个文件变更（使用 Git Data API 实现单个 commit）
+  async batchCommit(
+    changes: BatchChange[],
+    message: string
+  ): Promise<{ success: boolean; sha?: string; error?: string }> {
+    this.checkInit();
+
+    if (changes.length === 0) {
+      return { success: false, error: "没有要提交的变更" };
+    }
+
+    try {
+      // 1. 获取当前分支的最新 commit
+      const branchRef = await this.octokit!.git.getRef({
+        owner: this.owner,
+        repo: this.repo,
+        ref: `heads/${this.branch}`,
+      });
+      const latestCommitSha = branchRef.data.object.sha;
+
+      // 2. 获取当前 commit 的 tree
+      const latestCommit = await this.octokit!.git.getCommit({
+        owner: this.owner,
+        repo: this.repo,
+        commit_sha: latestCommitSha,
+      });
+      const baseTreeSha = latestCommit.data.tree.sha;
+
+      // 3. 创建新的 tree entries
+      const treeEntries: Array<{
+        path: string;
+        mode: "100644" | "100755" | "040000" | "160000" | "120000";
+        type: "blob" | "tree" | "commit";
+        sha?: string | null;
+        content?: string;
+      }> = [];
+
+      for (const change of changes) {
+        if (change.type === "delete") {
+          // 删除文件：设置 sha 为 null
+          treeEntries.push({
+            path: change.path,
+            mode: "100644",
+            type: "blob",
+            sha: null,
+          });
+        } else {
+          // 创建或更新文件
+          treeEntries.push({
+            path: change.path,
+            mode: "100644",
+            type: "blob",
+            content: change.content || "",
+          });
+        }
+      }
+
+      // 4. 创建新的 tree
+      const newTree = await this.octokit!.git.createTree({
+        owner: this.owner,
+        repo: this.repo,
+        base_tree: baseTreeSha,
+        tree: treeEntries,
+      });
+
+      // 5. 创建新的 commit
+      const newCommit = await this.octokit!.git.createCommit({
+        owner: this.owner,
+        repo: this.repo,
+        message,
+        tree: newTree.data.sha,
+        parents: [latestCommitSha],
+      });
+
+      // 6. 更新分支引用
+      await this.octokit!.git.updateRef({
+        owner: this.owner,
+        repo: this.repo,
+        ref: `heads/${this.branch}`,
+        sha: newCommit.data.sha,
+      });
+
+      // 清除文章缓存
+      this.clearArticlesCache();
+
+      return { success: true, sha: newCommit.data.sha };
+    } catch (error: any) {
+      console.error("Batch commit failed:", error);
+      return {
+        success: false,
+        error: error.message || "提交失败",
       };
     }
   }

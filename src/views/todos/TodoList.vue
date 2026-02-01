@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Todo } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -176,21 +178,23 @@ async function saveTodo() {
       }
     }
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token) {
-      const message = isNewTodo.value
+      const description = isNewTodo.value
         ? `✅ 添加待办: ${todoData.task}`
         : `✅ 更新待办: ${todoData.task}`;
-      dataSha.value = await githubAPI.saveTodos(
-        todos.value,
-        dataSha.value,
-        message,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/todos.json',
+        type: isNewTodo.value ? 'create' : 'update',
+        content: JSON.stringify({ todos: todos.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
 
     successMessage.value = isNewTodo.value
-      ? "待办添加成功！"
-      : "待办更新成功！";
+      ? "待办添加成功（待提交）"
+      : "待办更新成功（待提交）";
     setTimeout(() => {
       successMessage.value = null;
     }, 3000);
@@ -215,14 +219,16 @@ async function toggleComplete(todo: Todo) {
 
   try {
     if (authStore.token) {
-      const message = newCompleted
+      const description = newCompleted
         ? `✅ 完成待办: ${todo.task}`
         : `🔄 重新打开待办: ${todo.task}`;
-      dataSha.value = await githubAPI.saveTodos(
-        todos.value,
-        dataSha.value,
-        message,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/todos.json',
+        type: 'update',
+        content: JSON.stringify({ todos: todos.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
   } catch (err) {
     console.error("Failed to toggle todo:", err);
@@ -268,16 +274,18 @@ async function deleteTodo(todo: Todo) {
   try {
     todos.value = todos.value.filter((t) => t.id !== todo.id);
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token) {
-      dataSha.value = await githubAPI.saveTodos(
-        todos.value,
-        dataSha.value,
-        `🗑️ 删除待办: ${todo.task}`,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/todos.json',
+        type: 'delete',
+        content: JSON.stringify({ todos: todos.value }, null, 2),
+        sha: dataSha.value,
+        description: `🗑️ 删除待办: ${todo.task}`,
+      });
     }
 
-    successMessage.value = "待办删除成功！";
+    successMessage.value = "待办删除成功（待提交）";
     setTimeout(() => {
       successMessage.value = null;
     }, 3000);

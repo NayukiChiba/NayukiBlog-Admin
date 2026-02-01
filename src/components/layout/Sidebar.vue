@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useSidebarStore } from '@/stores/sidebar'
+import { usePendingChangesStore } from '@/stores/pendingChanges'
+import { CommitModal } from '@/components/common'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const sidebarStore = useSidebarStore()
+const pendingChangesStore = usePendingChangesStore()
+
+// Git 模态框状态
+const showCommitModal = ref(false)
 
 // 导航菜单项
 const menuItems = [
@@ -129,6 +135,14 @@ function handleMenuClick() {
           <span class="user-login">@{{ authStore.user.login }}</span>
         </div>
       </div>
+      <button class="git-btn" :class="{ 'has-changes': pendingChangesStore.hasChanges }" @click="showCommitModal = true" title="提交变更">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <line x1="1.05" y1="12" x2="7" y2="12"></line>
+          <line x1="17.01" y1="12" x2="22.96" y2="12"></line>
+        </svg>
+        <span v-if="pendingChangesStore.hasChanges" class="changes-badge">{{ pendingChangesStore.changesCount }}</span>
+      </button>
       <button class="logout-btn" @click="handleLogout" title="退出登录">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -138,6 +152,9 @@ function handleMenuClick() {
       </button>
     </div>
   </aside>
+
+  <!-- Git 提交模态框 -->
+  <CommitModal :show="showCommitModal" @close="showCommitModal = false" />
 </template>
 
 <style scoped>
@@ -318,6 +335,51 @@ function handleMenuClick() {
 .logout-btn:hover {
   background: #fef2f2;
   color: #ef4444;
+}
+
+.git-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 0.5rem;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.git-btn:hover {
+  background: #f0fdf4;
+  color: #22c55e;
+}
+
+.git-btn.has-changes {
+  color: #f59e0b;
+}
+
+.git-btn.has-changes:hover {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.changes-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  color: white;
+  background: #ef4444;
+  border-radius: 9999px;
 }
 
 /* 响应式：移动端 */

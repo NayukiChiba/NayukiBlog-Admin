@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Diary } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/components/common";
 
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -201,17 +203,19 @@ async function saveDiary() {
       }
     }
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token && dataSha.value) {
-      const message = isNewDiary.value ? "📔 新建日记" : "📔 更新日记";
-      dataSha.value = await githubAPI.saveDiaries(
-        diaries.value,
-        dataSha.value,
-        message,
-      );
+      const description = isNewDiary.value ? "📔 新建日记" : "📔 更新日记";
+      pendingChangesStore.addChange({
+        path: 'src/data/diaries.json',
+        type: isNewDiary.value ? 'create' : 'update',
+        content: JSON.stringify({ diaries: diaries.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
 
-    successMessage.value = isNewDiary.value ? "日记已创建" : "日记已更新";
+    successMessage.value = isNewDiary.value ? "日记已创建（待提交）" : "日记已更新（待提交）";
     setTimeout(() => (successMessage.value = null), 3000);
     closeModal();
   } catch (err) {
@@ -228,16 +232,18 @@ async function deleteDiary(diary: Diary) {
   try {
     diaries.value = diaries.value.filter((d) => d.id !== diary.id);
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token && dataSha.value) {
-      dataSha.value = await githubAPI.saveDiaries(
-        diaries.value,
-        dataSha.value,
-        "📔 删除日记",
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/diaries.json',
+        type: 'delete',
+        content: JSON.stringify({ diaries: diaries.value }, null, 2),
+        sha: dataSha.value,
+        description: "📔 删除日记",
+      });
     }
 
-    successMessage.value = "日记已删除";
+    successMessage.value = "日记已删除（待提交）";
     setTimeout(() => (successMessage.value = null), 3000);
   } catch (err) {
     error.value = err instanceof Error ? err.message : "删除失败";

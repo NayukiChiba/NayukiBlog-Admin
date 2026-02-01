@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Project } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import { DevPreviewBanner, CustomSelect } from "@/components/common";
 
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -164,19 +166,21 @@ async function saveProject() {
       }
     }
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token && dataSha.value) {
-      const message = isNewProject.value
+      const description = isNewProject.value
         ? `📁 新建项目: ${form.value.name}`
         : `📁 更新项目: ${form.value.name}`;
-      dataSha.value = await githubAPI.saveProjects(
-        projects.value,
-        dataSha.value,
-        message,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/projects.json',
+        type: isNewProject.value ? 'create' : 'update',
+        content: JSON.stringify({ projects: projects.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
 
-    successMessage.value = isNewProject.value ? "项目已创建" : "项目已更新";
+    successMessage.value = isNewProject.value ? "项目已创建（待提交）" : "项目已更新（待提交）";
     setTimeout(() => (successMessage.value = null), 3000);
     closeModal();
   } catch (err) {
@@ -194,14 +198,16 @@ async function deleteProject(project: Project) {
     projects.value = projects.value.filter((p) => p.id !== project.id);
 
     if (authStore.token && dataSha.value) {
-      dataSha.value = await githubAPI.saveProjects(
-        projects.value,
-        dataSha.value,
-        `📁 删除项目: ${project.name}`,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/projects.json',
+        type: 'delete',
+        content: JSON.stringify({ projects: projects.value }, null, 2),
+        sha: dataSha.value,
+        description: `📁 删除项目: ${project.name}`,
+      });
     }
 
-    successMessage.value = "项目已删除";
+    successMessage.value = "项目已删除（待提交）";
     setTimeout(() => (successMessage.value = null), 3000);
   } catch (err) {
     error.value = err instanceof Error ? err.message : "删除失败";

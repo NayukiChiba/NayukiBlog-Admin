@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Tool } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import { DevPreviewBanner } from "@/components/common";
 
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -165,21 +167,23 @@ async function saveTool() {
       }
     }
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token) {
-      const message = isNewTool.value
+      const description = isNewTool.value
         ? `🔧 添加工具: ${toolData.name}`
         : `🔧 更新工具: ${toolData.name}`;
-      dataSha.value = await githubAPI.saveTools(
-        tools.value,
-        dataSha.value,
-        message,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/tools.json',
+        type: isNewTool.value ? 'create' : 'update',
+        content: JSON.stringify({ tools: tools.value }, null, 2),
+        sha: dataSha.value,
+        description,
+      });
     }
 
     successMessage.value = isNewTool.value
-      ? "工具添加成功！"
-      : "工具更新成功！";
+      ? "工具添加成功（待提交）"
+      : "工具更新成功（待提交）";
     setTimeout(() => {
       successMessage.value = null;
     }, 3000);
@@ -200,16 +204,18 @@ async function deleteTool(tool: Tool) {
   try {
     tools.value = tools.value.filter((t) => t.id !== tool.id);
 
-    // 保存到 GitHub
+    // 添加到待提交变更（不立即保存到 GitHub）
     if (authStore.token) {
-      dataSha.value = await githubAPI.saveTools(
-        tools.value,
-        dataSha.value,
-        `🗑️ 删除工具: ${tool.name}`,
-      );
+      pendingChangesStore.addChange({
+        path: 'src/data/tools.json',
+        type: 'delete',
+        content: JSON.stringify({ tools: tools.value }, null, 2),
+        sha: dataSha.value,
+        description: `🗑️ 删除工具: ${tool.name}`,
+      });
     }
 
-    successMessage.value = "工具删除成功！";
+    successMessage.value = "工具删除成功（待提交）";
     setTimeout(() => {
       successMessage.value = null;
     }, 3000);

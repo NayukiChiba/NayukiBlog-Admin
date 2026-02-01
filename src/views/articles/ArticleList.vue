@@ -2,12 +2,14 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { usePendingChangesStore } from "@/stores/pendingChanges";
 import { githubAPI, type Article } from "@/api/github";
 import { isDevPreviewMode } from "@/router";
 import { DevPreviewBanner } from "@/components/common";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const pendingChangesStore = usePendingChangesStore();
 
 // 是否为开发预览模式
 const isPreviewMode = ref(false);
@@ -91,10 +93,18 @@ async function deleteArticle(article: Article) {
   try {
     if (authStore.token && article.sha) {
       githubAPI.init(authStore.token);
-      await githubAPI.deleteArticle(article.slug, article.sha);
-      // 清除缓存并重新加载
-      githubAPI.clearArticlesCache();
-      successMessage.value = `文章「${article.title}」已删除`;
+      
+      // 添加到待提交变更（不立即保存到 GitHub）
+      const path = `src/content/blog/${article.slug}.md`;
+      pendingChangesStore.addChange({
+        path,
+        type: 'delete',
+        content: '', // 删除操作不需要内容
+        sha: article.sha,
+        description: `🗑️ 删除文章: ${article.title}`,
+      });
+      
+      successMessage.value = `文章「${article.title}」已标记删除（待提交）`;
     }
     // 从列表中移除
     articles.value = articles.value.filter((a) => a.slug !== article.slug);
