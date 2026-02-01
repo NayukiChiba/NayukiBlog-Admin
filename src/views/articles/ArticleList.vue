@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { githubAPI, type Article } from "@/api/github";
@@ -19,6 +19,12 @@ const searchQuery = ref("");
 const error = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
 
+// 分页状态
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalArticles = ref(0);
+const totalPages = ref(0);
+
 // 筛选后的文章列表
 const filteredArticles = computed(() => {
   return articles.value.filter((article) => {
@@ -33,8 +39,13 @@ const filteredArticles = computed(() => {
   });
 });
 
-// 获取文章列表
-async function fetchArticles() {
+// 监听搜索变化，重置页码
+watch(searchQuery, () => {
+  currentPage.value = 1;
+});
+
+// 获取文章列表（分页）
+async function fetchArticles(forceRefresh = false) {
   // 检查是否为开发预览模式
   isPreviewMode.value = isDevPreviewMode();
 
@@ -49,8 +60,14 @@ async function fetchArticles() {
 
   try {
     githubAPI.init(authStore.token);
-    const result = await githubAPI.getArticles();
-    articles.value = result;
+    const result = await githubAPI.getArticlesPaginated(
+      currentPage.value,
+      pageSize.value,
+      forceRefresh,
+    );
+    articles.value = result.articles;
+    totalArticles.value = result.total;
+    totalPages.value = result.totalPages;
   } catch (err) {
     console.error("Failed to fetch articles:", err);
     error.value = "获取文章列表失败";
@@ -75,10 +92,13 @@ async function deleteArticle(article: Article) {
     if (authStore.token && article.sha) {
       githubAPI.init(authStore.token);
       await githubAPI.deleteArticle(article.slug, article.sha);
+      // 清除缓存并重新加载
+      githubAPI.clearArticlesCache();
       successMessage.value = `文章「${article.title}」已删除`;
     }
     // 从列表中移除
     articles.value = articles.value.filter((a) => a.slug !== article.slug);
+    totalArticles.value -= 1;
 
     // 3秒后清除成功消息
     setTimeout(() => {
@@ -94,9 +114,26 @@ async function deleteArticle(article: Article) {
   }
 }
 
-// 刷新列表
+// 刷新列表（强制刷新缓存）
 function refreshList() {
+  fetchArticles(true);
+}
+
+// 分页：跳转到指定页
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value) return;
+  currentPage.value = page;
   fetchArticles();
+}
+
+// 分页：上一页
+function prevPage() {
+  goToPage(currentPage.value - 1);
+}
+
+// 分页：下一页
+function nextPage() {
+  goToPage(currentPage.value + 1);
 }
 
 // 退出开发预览模式 - 由 DevPreviewBanner 组件处理
@@ -388,16 +425,76 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
+
+      <!-- 分页组件 -->
+      <div v-if="totalPages > 1" class="pagination">
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === 1"
+          @click="prevPage"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          上一页
+        </button>
+
+        <div class="pagination-pages">
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            class="pagination-page"
+            :class="{ active: page === currentPage }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === totalPages"
+          @click="nextPage"
+        >
+          下一页
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- 统计信息 -->
     <div class="stats-bar">
-      <span>共 {{ filteredArticles.length }} 篇文章</span>
+      <span>共 {{ totalArticles }} 篇文章</span>
+      <span v-if="totalPages > 1" class="stats-page">
+        第 {{ currentPage }} / {{ totalPages }} 页
+      </span>
       <span
-        v-if="filteredArticles.length !== articles.length"
+        v-if="searchQuery && filteredArticles.length !== articles.length"
         class="stats-filtered"
       >
-        (已筛选，共 {{ articles.length }} 篇)
+        (搜索结果: {{ filteredArticles.length }} 篇)
       </span>
     </div>
   </div>
@@ -765,5 +862,84 @@ onMounted(() => {
   .table td:nth-child(4) {
     display: none;
   }
+
+  .pagination {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .pagination-pages {
+    order: -1;
+  }
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: #6366f1;
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pagination-page {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination-page:hover {
+  background: #f1f5f9;
+}
+
+.pagination-page.active {
+  color: #fff;
+  background: #6366f1;
+  border-color: #6366f1;
+}
+
+.stats-page {
+  color: #94a3b8;
+  margin-left: 0.5rem;
 }
 </style>

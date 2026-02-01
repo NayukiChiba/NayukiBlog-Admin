@@ -96,6 +96,11 @@ class GitHubAPI {
   private repo = REPO_NAME;
   private branch = BRANCH;
 
+  // 缓存相关
+  private articlesCache: Article[] | null = null;
+  private articlesCacheTime: number = 0;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 缓存5分钟
+
   // 初始化 Octokit
   init(token: string) {
     this.octokit = new Octokit({
@@ -241,32 +246,92 @@ class GitHubAPI {
 
   // ==================== 文章管理 ====================
 
-  // 获取所有文章（包括子文件夹）
-  async getArticles(): Promise<Article[]> {
+  // 清除文章缓存
+  clearArticlesCache() {
+    this.articlesCache = null;
+    this.articlesCacheTime = 0;
+  }
+
+  // 检查缓存是否有效
+  private isCacheValid(): boolean {
+    return (
+      this.articlesCache !== null &&
+      Date.now() - this.articlesCacheTime < this.CACHE_DURATION
+    );
+  }
+
+  // 获取所有文章（带缓存，包括子文件夹）
+  async getArticles(forceRefresh = false): Promise<Article[]> {
+    // 如果缓存有效且不强制刷新，直接返回缓存
+    if (!forceRefresh && this.isCacheValid()) {
+      return this.articlesCache!;
+    }
+
     const files = await this.listFiles(PATHS.articles, true); // 递归获取
     const articles: Article[] = [];
 
-    for (const file of files) {
-      if (file.name.endsWith(".md")) {
-        try {
-          const { content, sha } = await this.getFileContent(file.path);
-          // 计算相对于 blog 目录的文件夹路径
-          const relativePath = file.path.replace(PATHS.articles + "/", "");
-          const folderPath = relativePath.includes("/")
-            ? relativePath.substring(0, relativePath.lastIndexOf("/"))
-            : "";
-          const article = this.parseMarkdown(content, file.name, sha, folderPath);
-          articles.push(article);
-        } catch (error) {
-          console.error(`Failed to parse article: ${file.name}`, error);
-        }
+    // 并行获取文件内容，提升速度
+    const mdFiles = files.filter((file) => file.name.endsWith(".md"));
+    const promises = mdFiles.map(async (file) => {
+      try {
+        const { content, sha } = await this.getFileContent(file.path);
+        // 计算相对于 blog 目录的文件夹路径
+        const relativePath = file.path.replace(PATHS.articles + "/", "");
+        const folderPath = relativePath.includes("/")
+          ? relativePath.substring(0, relativePath.lastIndexOf("/"))
+          : "";
+        return this.parseMarkdown(content, file.name, sha, folderPath);
+      } catch (error) {
+        console.error(`Failed to parse article: ${file.name}`, error);
+        return null;
+      }
+    });
+
+    const results = await Promise.all(promises);
+    for (const article of results) {
+      if (article) {
+        articles.push(article);
       }
     }
 
     // 按日期排序
-    return articles.sort(
+    const sortedArticles = articles.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
+
+    // 更新缓存
+    this.articlesCache = sortedArticles;
+    this.articlesCacheTime = Date.now();
+
+    return sortedArticles;
+  }
+
+  // 分页获取文章
+  async getArticlesPaginated(
+    page = 1,
+    pageSize = 10,
+    forceRefresh = false,
+  ): Promise<{
+    articles: Article[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }> {
+    const allArticles = await this.getArticles(forceRefresh);
+    const total = allArticles.length;
+    const totalPages = Math.ceil(total / pageSize);
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const articles = allArticles.slice(start, end);
+
+    return {
+      articles,
+      total,
+      page,
+      pageSize,
+      totalPages,
+    };
   }
 
   // 获取单篇文章（slug 可以包含文件夹路径，如 "folder/subfolder/article-name"）
