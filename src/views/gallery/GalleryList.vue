@@ -91,12 +91,12 @@ function openNewModal() {
   isNewItem.value = true;
   editingItem.value = null;
   form.value = {
-    id: Date.now(),
+    id: Math.max(0, ...gallery.value.map((i) => i.id)) + 1,
     title: "",
     url: "",
     date: new Date().toISOString().split("T")[0],
     tags: [],
-    status: "public",
+    status: "published",
   };
   tagInput.value = "";
   showModal.value = true;

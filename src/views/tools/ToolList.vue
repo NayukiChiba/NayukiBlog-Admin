@@ -107,13 +107,13 @@ function openNewModal() {
   isNewTool.value = true;
   editingTool.value = null;
   form.value = {
-    id: Date.now(),
+    id: Math.max(0, ...tools.value.map((t) => t.id)) + 1,
     name: "",
     description: "",
     url: "",
     icon: "",
     category: "",
-    status: "active",
+    status: "published",
   };
   showModal.value = true;
 }

@@ -121,14 +121,14 @@ function openNewModal() {
   isNewTodo.value = true;
   editingTodo.value = null;
   form.value = {
-    id: Date.now(),
+    id: Math.max(0, ...todos.value.map((t) => t.id)) + 1,
     task: "",
     completed: false,
     priority: "medium",
     type: "short-term",
     progress: 0,
     icon: "",
-    status: "active",
+    status: "published",
   };
   showModal.value = true;
 }
