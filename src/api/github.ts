@@ -25,7 +25,7 @@ export interface Article {
   tags: string[];
   description: string;
   image: string;
-  status: "public" | "draft" | "private";
+  status: "published" | "draft" | "private";
   content: string;
   sha?: string;
   folder?: string; // 文章所在的子文件夹路径（相对于 blog 目录）
@@ -46,7 +46,7 @@ export interface Project {
   description: string;
   link: string;
   techStack: string[];
-  status: "completed" | "in-progress" | "planned";
+  status: "completed" | "in-progress" | "planning";
   visibility: string;
 }
 

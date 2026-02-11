@@ -36,7 +36,7 @@ const form = ref({
   url: "",
   icon: "🔧",
   category: "",
-  status: "active",
+  status: "published",
 });
 
 // 图标选项

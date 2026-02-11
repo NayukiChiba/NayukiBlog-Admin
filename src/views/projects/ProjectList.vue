@@ -46,7 +46,7 @@ const techInput = ref("");
 const statusOptions = [
   { value: "completed", label: "已完成", color: "green" },
   { value: "in-progress", label: "进行中", color: "blue" },
-  { value: "planned", label: "计划中", color: "gray" },
+  { value: "planning", label: "计划中", color: "gray" },
 ];
 
 // 筛选后的项目列表
@@ -222,7 +222,7 @@ function getStatusClass(status: string) {
       return "badge-success";
     case "in-progress":
       return "badge-primary";
-    case "planned":
+    case "planning":
       return "badge-gray";
     default:
       return "badge-gray";
@@ -236,7 +236,7 @@ function getStatusText(status: string) {
       return "已完成";
     case "in-progress":
       return "进行中";
-    case "planned":
+    case "planning":
       return "计划中";
     default:
       return status;

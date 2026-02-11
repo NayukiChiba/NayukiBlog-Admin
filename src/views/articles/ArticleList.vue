@@ -165,7 +165,7 @@ function formatDate(dateStr: string) {
 // 获取状态标签样式
 function getStatusClass(status: string) {
   switch (status) {
-    case "public":
+    case "published":
       return "badge-success";
     case "draft":
       return "badge-warning";
@@ -179,7 +179,7 @@ function getStatusClass(status: string) {
 // 获取状态文字
 function getStatusText(status: string) {
   switch (status) {
-    case "public":
+    case "published":
       return "已发布";
     case "draft":
       return "草稿";

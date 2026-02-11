@@ -52,7 +52,7 @@ const form = ref<Omit<Article, "sha"> & { sha?: string }>(
     tags: [],
     description: "",
     image: "https://img.yumeko.site/file/wife/早坂爱.jpg",
-    status: "public",
+    status: "published",
     content: "",
     folder: "",
   },
@@ -102,7 +102,7 @@ const categoryTree: CategoryNode[] = [
 
 // 状态选项
 const statusOptions = [
-  { value: "public", label: "公开", color: "green" },
+  { value: "published", label: "公开", color: "green" },
   { value: "draft", label: "草稿", color: "yellow" },
   { value: "private", label: "私密", color: "gray" },
 ];
@@ -690,7 +690,7 @@ onMounted(() => {
                   { active: form.status === opt.value },
                 ]"
                 @click="
-                  form.status = opt.value as 'public' | 'draft' | 'private'
+                  form.status = opt.value as 'published' | 'draft' | 'private'
                 "
               >
                 {{ opt.label }}

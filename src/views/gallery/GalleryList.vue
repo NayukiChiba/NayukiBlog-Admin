@@ -32,7 +32,7 @@ const form = ref({
   url: "",
   date: new Date().toISOString().split("T")[0],
   tags: [] as string[],
-  status: "public",
+  status: "published",
 });
 
 // 标签输入
@@ -40,7 +40,7 @@ const tagInput = ref("");
 
 // 状态选项
 const statusOptions = [
-  { value: "public", label: "公开", color: "green" },
+  { value: "published", label: "公开", color: "green" },
   { value: "private", label: "私密", color: "gray" },
 ];
 

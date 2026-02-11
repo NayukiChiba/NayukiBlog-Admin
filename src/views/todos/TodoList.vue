@@ -128,7 +128,7 @@ function openNewModal() {
     type: "short-term",
     progress: 0,
     icon: "",
-    status: "published",
+    status: "active",
   };
   showModal.value = true;
 }
