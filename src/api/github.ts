@@ -122,6 +122,14 @@ class GitHubAPI {
   init(token: string) {
     this.octokit = new Octokit({
       auth: token,
+      request: {
+        // Octokit v20 会将路径中的 / 编码为 %2F，
+        // 导致 GitHub API 返回 404（该格式已被弃用）
+        fetch: (url: string, options: RequestInit) => {
+          const fixedUrl = url.replace(/%2F/g, "/");
+          return fetch(fixedUrl, options);
+        },
+      },
     });
   }
 
