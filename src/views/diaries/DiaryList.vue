@@ -35,10 +35,21 @@ const showModal = ref(false);
 const editingDiary = ref<Diary | null>(null);
 const isNewDiary = ref(false);
 
+// 获取 UTC+8 时间字符串，格式: YYYY-MM-DDTHH:mm
+function getUTC8DateTimeString(): string {
+  const utc8 = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const year = utc8.getUTCFullYear();
+  const month = String(utc8.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(utc8.getUTCDate()).padStart(2, "0");
+  const hours = String(utc8.getUTCHours()).padStart(2, "0");
+  const minutes = String(utc8.getUTCMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 // 表单数据
 const form = ref<Diary>({
   id: 0,
-  date: new Date().toISOString().slice(0, 16),
+  date: getUTC8DateTimeString(),
   content: "",
   mood: "happy",
   weather: "sunny",
@@ -160,7 +171,7 @@ function openNewModal() {
   editingDiary.value = null;
   form.value = {
     id: Math.max(0, ...diaries.value.map((d) => d.id)) + 1,
-    date: new Date().toISOString().slice(0, 16),
+    date: getUTC8DateTimeString(),
     content: "",
     mood: "happy",
     weather: "sunny",
