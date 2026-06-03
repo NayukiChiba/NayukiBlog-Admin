@@ -1,18 +1,28 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   show: boolean;
   title: string;
   width?: string;
+  closeOnClickOutside?: boolean;
 }>();
 
 const emit = defineEmits<{
   close: [];
 }>();
+
+function onOverlayClick() {
+  if (props.closeOnClickOutside !== true) return;
+  emit("close");
+}
 </script>
 
 <template>
   <Teleport to="body">
-    <div v-if="show" class="modal-overlay" @click.self="emit('close')">
+    <div
+      v-if="show"
+      class="modal-overlay"
+      @click.self="onOverlayClick()"
+    >
       <div class="modal" :style="{ maxWidth: width || '500px' }">
         <div class="modal-header">
           <h3 class="modal-title">{{ title }}</h3>

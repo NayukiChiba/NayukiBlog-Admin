@@ -430,7 +430,7 @@ onMounted(() => {
     </div>
 
     <!-- 编辑模态框 -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+    <div v-if="showModal" class="modal-overlay">
       <div class="modal">
         <div class="modal-header">
           <h3>{{ isNewBook ? "添加书籍" : "编辑书籍" }}</h3>
