@@ -70,9 +70,6 @@ npm run dev
 
 ### 架构说明
 
-![Oauth](https://img.yumeko.site/file/articles/NayukiBlog/Oauth.png)
-
-> 提示: CF Worker 和 EdgeOne 使用**同一个** GitHub OAuth App 的凭证。
 
 ### 1. 创建生产环境 GitHub OAuth App
 
