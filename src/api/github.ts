@@ -14,6 +14,7 @@ const PATHS = {
   gallery: "src/data/gallery.json",
   todos: "src/data/todos.json",
   tools: "src/data/tools.json",
+  rss: "src/data/rss.json",
 };
 
 // 类型定义
@@ -86,6 +87,14 @@ export interface Tool {
   url: string;
   icon: string;
   category: string;
+  status: string;
+}
+
+export interface RssFeed {
+  id: number;
+  name: string;
+  site: string;
+  feedUrl: string;
   status: string;
 }
 
@@ -619,6 +628,23 @@ status: ${article.status}
     message = "🔧 更新工具",
   ): Promise<string> {
     return await this.saveJsonData(PATHS.tools, { tools }, message, sha);
+  }
+
+  // ==================== RSS 订阅管理 ====================
+
+  async getRssFeeds(): Promise<{ feeds: RssFeed[]; sha: string }> {
+    const { data, sha } = await this.getJsonData<{ feeds: RssFeed[] }>(
+      PATHS.rss,
+    );
+    return { feeds: data.feeds || [], sha };
+  }
+
+  async saveRssFeeds(
+    feeds: RssFeed[],
+    sha: string,
+    message = "📡 更新 RSS 订阅",
+  ): Promise<string> {
+    return await this.saveJsonData(PATHS.rss, { feeds }, message, sha);
   }
 
   // ==================== 统计信息 ====================

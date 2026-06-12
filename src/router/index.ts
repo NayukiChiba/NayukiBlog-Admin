@@ -89,6 +89,12 @@ const router = createRouter({
       meta: { requiresAuth: true, title: "工具管理" },
     },
     {
+      path: "/rss",
+      name: "rss",
+      component: () => import("@/views/rss/RssList.vue"),
+      meta: { requiresAuth: true, title: "RSS 订阅" },
+    },
+    {
       path: "/:pathMatch(.*)*",
       name: "not-found",
       redirect: "/",

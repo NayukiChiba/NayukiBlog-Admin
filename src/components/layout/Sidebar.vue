@@ -25,6 +25,7 @@ const menuItems = [
   { name: 'gallery', path: '/gallery', icon: 'gallery', label: '图库管理' },
   { name: 'todos', path: '/todos', icon: 'todo', label: '待办管理' },
   { name: 'tools', path: '/tools', icon: 'tool', label: '工具管理' },
+  { name: 'rss', path: '/rss', icon: 'rss', label: 'RSS 订阅' },
 ]
 
 // 当前激活的菜单
@@ -114,6 +115,12 @@ function handleMenuClick() {
               <!-- Tool -->
               <svg v-else-if="item.icon === 'tool'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+              </svg>
+              <!-- RSS -->
+              <svg v-else-if="item.icon === 'rss'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 11a9 9 0 0 1 9 9"></path>
+                <path d="M4 4a16 16 0 0 1 16 16"></path>
+                <circle cx="5" cy="19" r="1"></circle>
               </svg>
             </span>
             <span class="nav-label">{{ item.label }}</span>

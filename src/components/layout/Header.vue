@@ -18,6 +18,7 @@ const titleMap: Record<string, string> = {
   gallery: '图库管理',
   todos: '待办管理',
   tools: '工具管理',
+  rss: 'RSS 订阅',
 }
 
 // 当前页面标题
