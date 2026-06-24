@@ -93,6 +93,7 @@ export interface Tool {
 export interface RssFeed {
   id: number;
   name: string;
+  category: string;
   site: string;
   feedUrl: string;
   status: string;

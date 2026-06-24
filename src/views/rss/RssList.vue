@@ -24,6 +24,7 @@ const successMessage = ref<string | null>(null);
 const showModal = ref(false);
 const editingFeed = ref<RssFeed | null>(null);
 const isNewFeed = ref(false);
+const showStatusDropdown = ref(false);
 
 // 筛选
 const searchQuery = ref("");
@@ -32,6 +33,7 @@ const searchQuery = ref("");
 const form = ref<RssFeed>({
   id: 0,
   name: "",
+  category: "AI",
   site: "",
   feedUrl: "",
   status: "active",
@@ -82,9 +84,11 @@ async function fetchFeeds() {
 function openNewModal() {
   isNewFeed.value = true;
   editingFeed.value = null;
+  showStatusDropdown.value = false;
   form.value = {
     id: Math.max(0, ...feeds.value.map((f) => f.id)) + 1,
     name: "",
+    category: "AI",
     site: "",
     feedUrl: "",
     status: "active",
@@ -96,6 +100,7 @@ function openNewModal() {
 function openEditModal(feed: RssFeed) {
   isNewFeed.value = false;
   editingFeed.value = feed;
+  showStatusDropdown.value = false;
   form.value = { ...feed };
   showModal.value = true;
 }
@@ -104,6 +109,12 @@ function openEditModal(feed: RssFeed) {
 function closeModal() {
   showModal.value = false;
   editingFeed.value = null;
+  showStatusDropdown.value = false;
+}
+
+function selectStatus(status: string) {
+  form.value.status = status;
+  showStatusDropdown.value = false;
 }
 
 // 订阅源显示名（名称为空时回退显示站点域名）
@@ -330,6 +341,7 @@ onMounted(() => {
               >
                 {{ feed.status === "active" ? "启用" : "停用" }}
               </span>
+              <span class="category-badge">{{ feed.category || "未分类" }}</span>
             </div>
             <div class="feed-urls">
               <a
@@ -442,13 +454,65 @@ onMounted(() => {
             <p class="form-hint">支持 RSS 2.0 / Atom / JSON Feed 格式</p>
           </div>
 
+          <!-- 分类 -->
+          <div class="form-group">
+            <label class="form-label">分类</label>
+            <input
+              v-model="form.category"
+              type="text"
+              class="input"
+              placeholder="输入分类名称，如：AI、技术"
+            />
+            <p class="form-hint">建议使用一级分类，避免 RSS 分类树过深</p>
+          </div>
+
           <!-- 状态 -->
           <div class="form-group">
             <label class="form-label">状态</label>
-            <select v-model="form.status" class="input">
-              <option value="active">启用</option>
-              <option value="disabled">停用</option>
-            </select>
+            <div class="custom-select">
+              <button
+                type="button"
+                class="custom-select-trigger"
+                :class="{ open: showStatusDropdown }"
+                @click="showStatusDropdown = !showStatusDropdown"
+              >
+                <span>{{ form.status === "active" ? "启用" : "停用" }}</span>
+                <svg
+                  class="custom-select-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div v-if="showStatusDropdown" class="custom-select-menu">
+                <button
+                  type="button"
+                  class="custom-select-option"
+                  :class="{ active: form.status === 'active' }"
+                  @click="selectStatus('active')"
+                >
+                  <span class="option-dot option-dot-active"></span>
+                  <span>启用</span>
+                </button>
+                <button
+                  type="button"
+                  class="custom-select-option"
+                  :class="{ active: form.status === 'disabled' }"
+                  @click="selectStatus('disabled')"
+                >
+                  <span class="option-dot option-dot-disabled"></span>
+                  <span>停用</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -596,6 +660,16 @@ onMounted(() => {
   background: #f1f5f9;
   color: #64748b;
   border: 1px solid #e2e8f0;
+}
+
+.category-badge {
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 500;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 
 .feed-urls {
@@ -780,6 +854,104 @@ onMounted(() => {
 
 .input:focus {
   border-color: #2563eb;
+}
+
+.custom-select {
+  position: relative;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: white;
+  color: #1e293b;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.custom-select-trigger:hover,
+.custom-select-trigger.open {
+  border-color: #2563eb;
+}
+
+.custom-select-trigger:focus-visible {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.custom-select-icon {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+.custom-select-trigger.open .custom-select-icon {
+  transform: rotate(180deg);
+}
+
+.custom-select-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  right: 0;
+  padding: 0.375rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.625rem;
+  box-shadow:
+    0 10px 15px -3px rgba(15, 23, 42, 0.12),
+    0 4px 6px -4px rgba(15, 23, 42, 0.12);
+}
+
+.custom-select-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #475569;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.custom-select-option:hover,
+.custom-select-option.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.option-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.option-dot-active {
+  background: #22c55e;
+}
+
+.option-dot-disabled {
+  background: #94a3b8;
 }
 
 /* 按钮 */
