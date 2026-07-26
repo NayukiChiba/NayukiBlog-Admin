@@ -513,6 +513,18 @@ onMounted(() => {
 <style scoped>
 .article-list {
   width: 100%;
+  animation: pageIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-header {
@@ -523,7 +535,7 @@ onMounted(() => {
 }
 
 .page-description {
-  color: #64748b;
+  color: #8b91a5;
   margin: 0;
 }
 
@@ -541,15 +553,15 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
 .success-message {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #16a34a;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
 }
 
 .error-message {
@@ -566,6 +578,7 @@ onMounted(() => {
   cursor: pointer;
   opacity: 0.5;
   line-height: 1;
+  transition: opacity 0.2s ease;
 }
 
 .close-btn:hover {
@@ -588,8 +601,9 @@ onMounted(() => {
 /* 卡片 */
 .card {
   background: white;
-  border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  border: 1px solid #e3e6f0;
+  box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
   overflow: hidden;
 }
 
@@ -604,7 +618,7 @@ onMounted(() => {
 .table td {
   padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #edeff7;
   vertical-align: middle;
 }
 
@@ -637,14 +651,21 @@ onMounted(() => {
 }
 
 .table th {
-  background: #f8fafc;
-  font-weight: 500;
-  font-size: 0.875rem;
-  color: #64748b;
+  background: #f7f8fc;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b91a5;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.table tbody tr {
+  transition: background-color 0.15s ease;
 }
 
 .table tbody tr:hover {
-  background: #f8fafc;
+  background: #f2f4f8;
 }
 
 .table tbody tr:last-child td {
@@ -660,7 +681,7 @@ onMounted(() => {
 
 .article-title {
   font-weight: 500;
-  color: #1e293b;
+  color: #14161f;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -668,7 +689,7 @@ onMounted(() => {
 
 .article-desc {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #8b91a5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -682,28 +703,34 @@ onMounted(() => {
 
 .tag {
   font-size: 0.625rem;
-  padding: 0.125rem 0.375rem;
-  background: #f1f5f9;
-  color: #64748b;
-  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: #eef0f8;
+  color: #6a7185;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 .tag-more {
-  background: #e2e8f0;
+  background: #e3e6f0;
 }
 
 .category {
   font-size: 0.875rem;
-  color: #475569;
+  color: #4e5567;
 }
 
 .date {
   font-size: 0.875rem;
-  color: #64748b;
+  color: #8b91a5;
   white-space: nowrap;
 }
 
-/* 状态徽章 */
+/* 状态徽章 — pill 化（published 绿 / draft 灰 / private 红） */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -717,23 +744,23 @@ onMounted(() => {
 }
 
 .badge-success {
-  background: #dcfce7;
-  color: #16a34a;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
 }
 
 .badge-warning {
-  background: #fef3c7;
-  color: #d97706;
+  background: #eef0f8;
+  color: #6a7185;
 }
 
 .badge-danger {
-  background: #fee2e2;
+  background: rgba(239, 68, 68, 0.12);
   color: #dc2626;
 }
 
 .badge-primary {
-  background: #dbeafe;
-  color: #2563eb;
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 /* 操作按钮 */
@@ -749,16 +776,17 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   border: none;
-  background: #f1f5f9;
-  border-radius: 0.375rem;
-  color: #64748b;
+  background: #f4f5fa;
+  border-radius: 9px;
+  color: #6a7185;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .action-btn:hover:not(:disabled) {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: #eaeef4;
+  color: #4c5670;
+  transform: translateY(-1px);
 }
 
 .action-btn:disabled {
@@ -767,7 +795,7 @@ onMounted(() => {
 }
 
 .action-btn-danger:hover:not(:disabled) {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
 }
 
@@ -776,14 +804,14 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn:disabled {
@@ -792,36 +820,51 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: #4c5670;
   color: white;
+  box-shadow: 0 6px 18px -8px rgba(76, 86, 112, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 12px 28px -12px rgba(26, 29, 36, 0.24);
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: white;
+  color: #4e5567;
+  border: 1px solid #e3e6f0;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e2e8f0;
+  border-color: #bcc8d9;
+  background: #f5f7fa;
+  color: #414a61;
 }
 
 /* 输入框 */
 .input {
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
+  padding: 0.55rem 0.875rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   font-size: 0.875rem;
-  transition: border-color 0.2s ease;
+  color: #14161f;
+  background: white;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.input::placeholder {
+  color: #8b91a5;
 }
 
 .input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
 }
 
 /* 状态 */
@@ -832,12 +875,12 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  color: #64748b;
+  color: #8b91a5;
   gap: 1rem;
 }
 
 .empty-state svg {
-  color: #cbd5e1;
+  color: #cdd2e0;
 }
 
 .empty-state p {
@@ -848,8 +891,8 @@ onMounted(() => {
 .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 2px solid #e6e8ee;
+  border-top-color: #4c5670;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -868,11 +911,11 @@ onMounted(() => {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: #8b91a5;
 }
 
 .stats-filtered {
-  color: #94a3b8;
+  color: #93a9c9;
 }
 
 /* 响应式 */
@@ -921,14 +964,14 @@ onMounted(() => {
   }
 }
 
-/* 分页样式 */
+/* 分页样式 — pill 化 */
 .pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   padding: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #edeff7;
 }
 
 .pagination-btn {
@@ -937,18 +980,18 @@ onMounted(() => {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: #6a7185;
   background: transparent;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pagination-btn:hover:not(:disabled) {
-  color: #6366f1;
-  border-color: #6366f1;
-  background: #eef2ff;
+  color: #414a61;
+  border-color: #bcc8d9;
+  background: #f5f7fa;
 }
 
 .pagination-btn:disabled {
@@ -968,26 +1011,41 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 0.875rem;
-  color: #64748b;
+  color: #6a7185;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 0.375rem;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pagination-page:hover {
-  background: #f1f5f9;
+  background: #eef0f8;
+  color: #14161f;
 }
 
 .pagination-page.active {
   color: #fff;
-  background: #6366f1;
-  border-color: #6366f1;
+  background: #4c5670;
+  border-color: transparent;
+  box-shadow: 0 6px 16px -6px rgba(76, 86, 112, 0.35);
 }
 
 .stats-page {
-  color: #94a3b8;
+  color: #93a9c9;
   margin-left: 0.5rem;
+}
+
+/* 减少动效 */
+@media (prefers-reduced-motion: reduce) {
+  .article-list,
+  .btn,
+  .action-btn,
+  .pagination-btn,
+  .pagination-page,
+  .table tbody tr {
+    animation: none;
+    transition: none;
+  }
 }
 </style>

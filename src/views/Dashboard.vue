@@ -154,9 +154,18 @@ onMounted(() => {
     <div class="dashboard">
         <!-- 欢迎区域 -->
         <section class="welcome-section">
+            <!-- 背景几何装饰 -->
+            <div class="welcome-decor" aria-hidden="true">
+                <div class="welcome-grid"></div>
+                <div class="welcome-blob welcome-blob-1"></div>
+                <div class="welcome-blob welcome-blob-2"></div>
+                <span class="welcome-ring"></span>
+                <span class="welcome-cross"></span>
+            </div>
             <div class="welcome-content">
+                <span class="welcome-bar" aria-hidden="true"></span>
                 <h2 class="welcome-title">
-                    欢迎回来，{{ authStore.user?.name || "Nayuki" }} 👋
+                    欢迎回来，<span class="welcome-name">{{ authStore.user?.name || "Nayuki" }}</span> 👋
                 </h2>
                 <p class="welcome-subtitle">今天想要做些什么呢？</p>
             </div>
@@ -584,6 +593,18 @@ onMounted(() => {
 <style scoped>
 .dashboard {
     width: 100%;
+    animation: pageIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 消息提示 */
@@ -595,19 +616,19 @@ onMounted(() => {
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 12px;
     font-size: 0.875rem;
     margin-bottom: 1rem;
 }
 
 .info-message {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #2563eb;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
 }
 
 .info-message a {
-    color: #1d4ed8;
+    color: #3b82f6;
     font-weight: 500;
     text-decoration: underline;
 }
@@ -625,13 +646,13 @@ onMounted(() => {
 }
 
 .preview-message {
-    background: #f0fdf4;
-    border: 1px solid #86efac;
-    color: #16a34a;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #10b981;
 }
 
 .preview-message a {
-    color: #15803d;
+    color: #047857;
     font-weight: 500;
     text-decoration: underline;
 }
@@ -639,17 +660,18 @@ onMounted(() => {
 .exit-preview-btn {
     margin-left: auto;
     padding: 0.25rem 0.75rem;
-    background: #16a34a;
+    background: #10b981;
     color: white;
     border: none;
-    border-radius: 0.25rem;
+    border-radius: 999px;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .exit-preview-btn:hover {
-    background: #15803d;
+    background: #059669;
+    transform: translateY(-1px);
 }
 
 .error-message {
@@ -658,47 +680,161 @@ onMounted(() => {
     color: #dc2626;
 }
 
-/* 欢迎区域 */
+/* 欢迎区域 — 云白卡片 + 几何装饰 */
 .welcome-section {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1.5rem;
-    padding: 1.5rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 1rem;
-    color: white;
+    padding: 1.875rem 2rem;
+    background: #ffffff;
+    border: 1px solid #e3e6f0;
+    border-radius: 20px;
+    box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
+    overflow: hidden;
+}
+
+.welcome-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* 细线网格（右侧渐隐） */
+.welcome-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(20, 22, 31, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 22, 31, 0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(115deg, transparent 40%, rgba(0, 0, 0, 0.9));
+    mask-image: linear-gradient(115deg, transparent 40%, rgba(0, 0, 0, 0.9));
+}
+
+/* 极光光斑 */
+.welcome-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+}
+
+.welcome-blob-1 {
+    top: -130px;
+    right: -70px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(147, 169, 201, 0.18), transparent 70%);
+}
+
+.welcome-blob-2 {
+    bottom: -150px;
+    right: 20%;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(147, 169, 201, 0.12), transparent 70%);
+}
+
+/* 描边圆环 */
+.welcome-ring {
+    position: absolute;
+    top: -48px;
+    right: 26%;
+    width: 130px;
+    height: 130px;
+    border: 1.5px solid rgba(20, 22, 31, 0.08);
+    border-radius: 50%;
+}
+
+/* 十字标记 */
+.welcome-cross {
+    position: absolute;
+    bottom: 20px;
+    right: 9%;
+    width: 14px;
+    height: 14px;
+}
+
+.welcome-cross::before,
+.welcome-cross::after {
+    content: "";
+    position: absolute;
+    background: rgba(20, 22, 31, 0.14);
+}
+
+.welcome-cross::before {
+    left: 50%;
+    top: 0;
+    width: 1.5px;
+    height: 100%;
+}
+
+.welcome-cross::after {
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+}
+
+.welcome-content {
+    position: relative;
+}
+
+/* 短杠装饰（纯色） */
+.welcome-bar {
+    display: block;
+    width: 2.5rem;
+    height: 4px;
+    border-radius: 999px;
+    background: #4c5670;
+    opacity: 0.85;
+    margin-bottom: 0.875rem;
 }
 
 .welcome-title {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1a1d24;
     margin: 0;
+}
+
+/* 用户名（纯色文字） */
+.welcome-name {
+    color: #1a1d24;
 }
 
 .welcome-subtitle {
     margin: 0.5rem 0 0;
-    opacity: 0.9;
+    color: #8b91a5;
+    font-size: 0.9375rem;
+}
+
+.welcome-actions {
+    position: relative;
 }
 
 .welcome-actions .btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    background: white;
-    color: #667eea;
-    font-weight: 500;
-    border-radius: 0.5rem;
+    padding: 0.7rem 1.375rem;
+    background: #4c5670;
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
     text-decoration: none;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+    box-shadow: 0 10px 24px -10px rgba(76, 86, 112, 0.35);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .welcome-actions .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #414a61;
+    box-shadow: 0 14px 32px -12px rgba(26, 29, 36, 0.24);
 }
 
 /* 统计卡片 */
@@ -713,54 +849,45 @@ onMounted(() => {
 }
 
 .stat-card {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 1rem;
     padding: 1.25rem;
     background: white;
-    border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
     text-decoration: none;
-    transition: all 0.2s ease;
+    overflow: hidden;
+    transition:
+        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+    border-color: #d8dce6;
+    box-shadow: 0 14px 32px -14px rgba(26, 29, 36, 0.14);
 }
 
+/* 图标容器：统一中性浅底 + 雾蓝图标 */
 .stat-icon {
     width: 48px;
     height: 48px;
-    border-radius: 0.75rem;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    background: #f2f4f8;
+    color: #4c5670;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.stat-card-blue .stat-icon {
-    background: #eff6ff;
-    color: #2563eb;
-}
-.stat-card-purple .stat-icon {
-    background: #f5f3ff;
-    color: #7c3aed;
-}
-.stat-card-green .stat-icon {
-    background: #f0fdf4;
-    color: #16a34a;
-}
-.stat-card-orange .stat-icon {
-    background: #fff7ed;
-    color: #ea580c;
-}
-.stat-card-pink .stat-icon {
-    background: #fdf2f8;
-    color: #db2777;
-}
-.stat-card-cyan .stat-icon {
-    background: #ecfeff;
-    color: #0891b2;
+.stat-card:hover .stat-icon {
+    transform: scale(1.07);
 }
 
 .stat-info {
@@ -769,9 +896,12 @@ onMounted(() => {
 }
 
 .stat-count {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    color: #1e293b;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: #14161f;
+    line-height: 1.2;
 }
 
 .stat-count.loading {
@@ -779,8 +909,8 @@ onMounted(() => {
 }
 
 .stat-label {
-    font-size: 0.875rem;
-    color: #64748b;
+    font-size: 0.8125rem;
+    color: #8b91a5;
 }
 
 /* 下方网格 */
@@ -798,16 +928,31 @@ onMounted(() => {
 
 .card {
     background: white;
-    border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
     padding: 1.5rem;
 }
 
+/* 节标题：左侧纯色竖杠 */
 .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
     font-size: 1rem;
     font-weight: 600;
-    color: #1e293b;
+    letter-spacing: -0.01em;
+    color: #14161f;
     margin: 0 0 1rem;
+}
+
+.section-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    border-radius: 999px;
+    background: #4c5670;
+    opacity: 0.85;
 }
 
 /* 快捷操作 */
@@ -822,47 +967,32 @@ onMounted(() => {
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 12px;
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.action-btn-primary {
-    background: #eff6ff;
-    color: #2563eb;
+.action-btn:hover {
+    transform: translateY(-2px);
 }
 
-.action-btn-primary:hover {
-    background: #dbeafe;
-}
-
-.action-btn-purple {
-    background: #f5f3ff;
-    color: #7c3aed;
-}
-
-.action-btn-purple:hover {
-    background: #ede9fe;
-}
-
-.action-btn-green {
-    background: #f0fdf4;
-    color: #16a34a;
-}
-
-.action-btn-green:hover {
-    background: #dcfce7;
-}
-
+/* 快捷操作按钮：统一中性浅底 + 雾蓝内容 */
+.action-btn-primary,
+.action-btn-purple,
+.action-btn-green,
 .action-btn-orange {
-    background: #fff7ed;
-    color: #ea580c;
+    background: #f2f4f8;
+    color: #4c5670;
 }
 
+.action-btn-primary:hover,
+.action-btn-purple:hover,
+.action-btn-green:hover,
 .action-btn-orange:hover {
-    background: #ffedd5;
+    background: #eaeef4;
+    box-shadow: 0 8px 20px -12px rgba(26, 29, 36, 0.14);
 }
 
 /* 最近活动 */
@@ -873,7 +1003,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    color: #64748b;
+    color: #8b91a5;
     gap: 0.5rem;
 }
 
@@ -887,7 +1017,7 @@ onMounted(() => {
     display: flex;
     gap: 0.75rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #edeff7;
 }
 
 .activity-item:last-child {
@@ -902,26 +1032,18 @@ onMounted(() => {
 .activity-icon {
     width: 28px;
     height: 28px;
-    border-radius: 50%;
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-.activity-icon-article {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.activity-icon-diary {
-    background: #f5f3ff;
-    color: #7c3aed;
-}
-
+.activity-icon-article,
+.activity-icon-diary,
 .activity-icon-project {
-    background: #f0fdf4;
-    color: #16a34a;
+    background: #f2f4f8;
+    color: #4c5670;
 }
 
 .activity-content {
@@ -932,11 +1054,11 @@ onMounted(() => {
 .activity-text {
     margin: 0;
     font-size: 0.875rem;
-    color: #1e293b;
+    color: #14161f;
 }
 
 .activity-action {
-    color: #64748b;
+    color: #8b91a5;
 }
 
 .activity-title {
@@ -946,15 +1068,15 @@ onMounted(() => {
 
 .activity-time {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: #8b91a5;
 }
 
 /* Spinner */
 .spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid #e2e8f0;
-    border-top-color: #2563eb;
+    border: 2px solid #e6e8ee;
+    border-top-color: #4c5670;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -972,6 +1094,7 @@ onMounted(() => {
         align-items: flex-start;
         gap: 1rem;
         text-align: left;
+        padding: 1.5rem;
     }
 
     .welcome-title {
@@ -984,6 +1107,20 @@ onMounted(() => {
 
     .actions-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* 减少动效 */
+@media (prefers-reduced-motion: reduce) {
+    .dashboard,
+    .stat-card,
+    .stat-card::before,
+    .stat-icon,
+    .action-btn,
+    .welcome-actions .btn,
+    .exit-preview-btn {
+        animation: none;
+        transition: none;
     }
 }
 </style>

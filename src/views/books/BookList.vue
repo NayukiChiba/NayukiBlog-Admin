@@ -515,6 +515,18 @@ onMounted(() => {
 <style scoped>
 .book-list {
   width: 100%;
+  animation: pageIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-header {
@@ -525,7 +537,7 @@ onMounted(() => {
 }
 
 .page-description {
-  color: #64748b;
+  color: #8b91a5;
   margin: 0;
 }
 
@@ -538,15 +550,15 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
 .success-message {
-  background: #f0fdf4;
-  border: 1px solid #86efac;
-  color: #16a34a;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
 }
 
 .error-message {
@@ -568,13 +580,13 @@ onMounted(() => {
 }
 
 .preview-message {
-  background: #f0fdf4;
-  border: 1px solid #86efac;
-  color: #16a34a;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #10b981;
 }
 
 .preview-message a {
-  color: #15803d;
+  color: #047857;
   font-weight: 500;
   text-decoration: underline;
 }
@@ -582,17 +594,17 @@ onMounted(() => {
 .exit-preview-btn {
   margin-left: auto;
   padding: 0.25rem 0.75rem;
-  background: #16a34a;
+  background: #10b981;
   color: white;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 999px;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .exit-preview-btn:hover {
-  background: #15803d;
+  background: #059669;
 }
 
 .close-btn {
@@ -604,6 +616,7 @@ onMounted(() => {
   cursor: pointer;
   padding: 0 0.25rem;
   opacity: 0.6;
+  transition: opacity 0.2s ease;
 }
 
 .close-btn:hover {
@@ -631,29 +644,40 @@ onMounted(() => {
 }
 
 .book-card {
+  position: relative;
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 16px;
   overflow: hidden;
-  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .book-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: #d8dce6;
+  box-shadow: 0 14px 32px -14px rgba(26, 29, 36, 0.14);
 }
 
 .book-cover {
   width: 100%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: #f1f5f9;
+  background: #eef0f8;
 }
 
 .book-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.book-card:hover .book-cover img {
+  transform: scale(1.04);
 }
 
 .book-info {
@@ -663,7 +687,7 @@ onMounted(() => {
 .book-title {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #14161f;
   margin: 0 0 0.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -680,30 +704,37 @@ onMounted(() => {
 
 .tag {
   font-size: 0.625rem;
-  padding: 0.125rem 0.375rem;
-  background: #f1f5f9;
-  color: #64748b;
-  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: #eef0f8;
+  color: #6a7185;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 .tag.removable {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eaeef4;
+  color: #4c5670;
   font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.625rem;
 }
 
 .tag-remove {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #4c5670;
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0;
   line-height: 1;
+  transition: color 0.15s ease;
 }
 
 .tag-remove:hover {
@@ -714,7 +745,7 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #edeff7;
 }
 
 .action-link {
@@ -723,15 +754,16 @@ onMounted(() => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: #f1f5f9;
-  border-radius: 0.375rem;
-  color: #2563eb;
+  background: #f4f5fa;
+  border-radius: 8px;
+  color: #4c5670;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .action-link:hover {
-  background: #eff6ff;
+  background: #eaeef4;
+  transform: translateY(-1px);
 }
 
 .action-btn {
@@ -741,20 +773,21 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   border: none;
-  background: #f1f5f9;
-  border-radius: 0.375rem;
-  color: #64748b;
+  background: #f4f5fa;
+  border-radius: 8px;
+  color: #6a7185;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .action-btn:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: #eaeef4;
+  color: #4c5670;
+  transform: translateY(-1px);
 }
 
 .action-btn-danger:hover {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
 }
 
@@ -776,9 +809,9 @@ onMounted(() => {
   margin-top: 0.5rem;
   width: 80px;
   height: 107px;
-  border-radius: 0.375rem;
+  border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e3e6f0;
 }
 
 .cover-preview img {
@@ -795,15 +828,16 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  color: #64748b;
+  color: #8b91a5;
   gap: 1rem;
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
 }
 
 .empty-state svg {
-  color: #cbd5e1;
+  color: #cdd2e0;
 }
 
 .empty-state p {
@@ -815,14 +849,16 @@ onMounted(() => {
   margin-top: 1.5rem;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: #8b91a5;
 }
 
 /* 模态框 */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 17, 28, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -832,18 +868,19 @@ onMounted(() => {
 
 .modal {
   background: white;
-  border-radius: 1rem;
+  border-radius: 20px;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  animation: modalIn 0.2s ease-out;
+  box-shadow: 0 24px 60px -16px rgba(23, 25, 35, 0.3);
+  animation: modalIn 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes modalIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-10px);
+    transform: scale(0.96) translateY(-8px);
   }
   to {
     opacity: 1;
@@ -856,14 +893,15 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #edeff7;
 }
 
 .modal-header h3 {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  letter-spacing: -0.01em;
+  color: #14161f;
 }
 
 .modal-body {
@@ -875,8 +913,8 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-top: 1px solid #edeff7;
+  background: #f7f8fc;
 }
 
 /* 表单 */
@@ -892,24 +930,31 @@ onMounted(() => {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #475569;
+  color: #4e5567;
   margin-bottom: 0.5rem;
 }
 
 .input {
   width: 100%;
-  padding: 0.625rem 0.75rem;
+  padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   background: white;
-  color: #1e293b;
+  color: #14161f;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.input::placeholder {
+  color: #8b91a5;
 }
 
 .input:focus {
-  border-color: #2563eb;
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
 }
 
 /* 按钮 */
@@ -918,13 +963,13 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1rem;
+  padding: 0.625rem 1.1rem;
   font-size: 0.875rem;
   font-weight: 500;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn:disabled {
@@ -933,34 +978,41 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: #4c5670;
   color: white;
+  box-shadow: 0 6px 18px -8px rgba(76, 86, 112, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 12px 28px -12px rgba(26, 29, 36, 0.24);
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: white;
+  color: #4e5567;
+  border: 1px solid #e3e6f0;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e2e8f0;
+  border-color: #bcc8d9;
+  background: #f5f7fa;
+  color: #414a61;
 }
 
 .card {
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
 }
 
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 2px solid #e6e8ee;
+  border-top-color: #4c5670;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -995,6 +1047,21 @@ onMounted(() => {
 @media (max-width: 480px) {
   .books-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 减少动效 */
+@media (prefers-reduced-motion: reduce) {
+  .book-list,
+  .book-card,
+  .book-card::before,
+  .book-cover img,
+  .modal,
+  .btn,
+  .action-btn,
+  .action-link {
+    animation: none;
+    transition: none;
   }
 }
 </style>

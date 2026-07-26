@@ -532,6 +532,18 @@ onMounted(() => {
 <style scoped>
 .diary-list {
   width: 100%;
+  animation: pageIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .diary-content {
@@ -548,9 +560,9 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 500;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn:disabled {
@@ -559,37 +571,44 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #6366f1;
+  background: #4c5670;
   color: white;
+  box-shadow: 0 6px 18px -8px rgba(76, 86, 112, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4f46e5;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 12px 28px -12px rgba(26, 29, 36, 0.24);
 }
 
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: white;
+  color: #4e5567;
+  border: 1px solid #e3e6f0;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  border-color: #bcc8d9;
+  background: #f5f7fa;
+  color: #414a61;
 }
 
 .exit-preview-btn {
   margin-left: auto;
   padding: 4px 12px;
   font-size: 12px;
-  background: #6366f1;
+  background: #4c5670;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .exit-preview-btn:hover {
-  background: #4f46e5;
+  background: #414a61;
+  transform: translateY(-1px);
 }
 
 /* 筛选栏 */
@@ -609,16 +628,19 @@ onMounted(() => {
   width: 100%;
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   background: white;
-  color: #1f2937;
+  color: #14161f;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .input:focus {
-  border-color: #6366f1;
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
 }
 
 /* 统计栏 */
@@ -627,15 +649,15 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   font-size: 14px;
-  color: #6b7280;
+  color: #8b91a5;
   margin-bottom: 24px;
 }
 
 .stats-filtered {
-  color: #9ca3af;
+  color: #93a9c9;
 }
 
-/* 日记时间线 */
+/* 日记时间线 — 素雅纯色时间轴 */
 .diary-timeline {
   position: relative;
   padding-left: 24px;
@@ -648,7 +670,8 @@ onMounted(() => {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #e5e7eb;
+  border-radius: 999px;
+  background: #dbe2eb;
 }
 
 .diary-item {
@@ -667,21 +690,34 @@ onMounted(() => {
   width: 16px;
   height: 16px;
   background: white;
-  border: 3px solid #6366f1;
+  border: 3px solid #4c5670;
   border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(76, 86, 112, 0.12);
   z-index: 1;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.diary-item:hover .timeline-dot {
+  border-color: #7690b4;
+  box-shadow: 0 0 0 5px rgba(147, 169, 201, 0.16);
 }
 
 .diary-card {
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #e3e6f0;
+  border-radius: 16px;
   padding: 20px;
-  transition: box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(23, 25, 35, 0.04);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .diary-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  border-color: #d8dce6;
+  box-shadow: 0 16px 36px -16px rgba(26, 29, 36, 0.14);
 }
 
 .diary-header {
@@ -700,12 +736,12 @@ onMounted(() => {
 .date {
   font-size: 14px;
   font-weight: 500;
-  color: #1f2937;
+  color: #14161f;
 }
 
 .relative-time {
   font-size: 12px;
-  color: #9ca3af;
+  color: #8b91a5;
 }
 
 .diary-meta {
@@ -717,7 +753,7 @@ onMounted(() => {
 .diary-content-text {
   font-size: 15px;
   line-height: 1.7;
-  color: #374151;
+  color: #373d4e;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -734,13 +770,13 @@ onMounted(() => {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .diary-image:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .diary-images:has(.diary-image:only-child) {
@@ -756,12 +792,13 @@ onMounted(() => {
   gap: 8px;
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #edeff7;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease;
 }
 
-.diary-card:hover .diary-actions {
+.diary-card:hover .diary-actions,
+.diary-card:focus-within .diary-actions {
   opacity: 1;
 }
 
@@ -772,20 +809,21 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   border: none;
-  background: #f3f4f6;
-  border-radius: 6px;
-  color: #6b7280;
+  background: #f4f5fa;
+  border-radius: 9px;
+  color: #6a7185;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .action-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: #eaeef4;
+  color: #4c5670;
+  transform: translateY(-1px);
 }
 
 .action-btn-danger:hover {
-  background: #fee2e2;
+  background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
 }
 
@@ -809,21 +847,22 @@ onMounted(() => {
   gap: 4px;
   padding: 10px 8px;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border: 1px solid #e3e6f0;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .option-btn:hover {
-  border-color: #d1d5db;
-  background: #f9fafb;
+  border-color: #bcc8d9;
+  background: #fafbff;
+  transform: translateY(-1px);
 }
 
 .option-btn.active {
-  background: #eef2ff;
-  border-color: #6366f1;
-  color: #4f46e5;
+  background: #eaeef4;
+  border-color: #93a9c9;
+  color: #4c5670;
 }
 
 .option-icon {
@@ -832,11 +871,11 @@ onMounted(() => {
 
 .option-label {
   font-size: 12px;
-  color: #6b7280;
+  color: #6a7185;
 }
 
 .option-btn.active .option-label {
-  color: #4f46e5;
+  color: #4c5670;
 }
 
 .spinner {
@@ -876,6 +915,21 @@ onMounted(() => {
 
   .diary-images {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 减少动效 */
+@media (prefers-reduced-motion: reduce) {
+  .diary-list,
+  .diary-card,
+  .diary-image,
+  .timeline-dot,
+  .btn,
+  .action-btn,
+  .option-btn,
+  .exit-preview-btn {
+    animation: none;
+    transition: none;
   }
 }
 </style>
