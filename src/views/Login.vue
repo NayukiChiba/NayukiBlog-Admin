@@ -11,6 +11,9 @@ const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// 本地开发构建标记（vite dev 下为 true，生产构建自动隐藏开发入口）
+const isLocalDev = import.meta.env.DEV;
+
 // GitHub OAuth 配置
 const GITHUB_CLIENT_ID =
     import.meta.env.VITE_GITHUB_CLIENT_ID || "your_client_id";
@@ -124,11 +127,17 @@ onMounted(() => {
 
         // 立即清除 URL 参数（防止刷新时重复请求）
         window.history.replaceState({}, "", "/login");
-        
+
         // 处理回调
         handleOAuthCallback(code, state);
     }
 });
+
+// 开发模式直接进入（仅本地 dev 构建显示，无需 GitHub 验证）
+function enterDevMode() {
+    localStorage.setItem("dev_preview", "true");
+    router.push("/");
+}
 
 // 进入开发预览模式
 function enterPreviewMode() {
@@ -139,19 +148,34 @@ function enterPreviewMode() {
 
 <template>
     <div class="login-page">
-        <!-- 背景装饰 -->
-        <div class="bg-decoration">
-            <div class="bg-circle bg-circle-1"></div>
-            <div class="bg-circle bg-circle-2"></div>
-            <div class="bg-circle bg-circle-3"></div>
+        <!-- 背景几何装饰 -->
+        <div class="bg-decoration" aria-hidden="true">
+            <div class="bg-grid"></div>
+            <div class="bg-aurora bg-aurora-1"></div>
+            <div class="bg-aurora bg-aurora-2"></div>
+            <span class="bg-ring bg-ring-1"></span>
+            <span class="bg-ring bg-ring-2"></span>
+            <span class="bg-square"></span>
+            <svg class="bg-triangle" viewBox="0 0 64 64" fill="none">
+                <path
+                    d="M32 8 L58 54 L6 54 Z"
+                    stroke="rgba(20, 22, 31, 0.1)"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                />
+            </svg>
+            <span class="bg-cross bg-cross-1"></span>
+            <span class="bg-cross bg-cross-2"></span>
+            <span class="bg-dot bg-dot-1"></span>
+            <span class="bg-dot bg-dot-2"></span>
         </div>
 
         <!-- 登录卡片 -->
         <div class="login-card">
             <!-- Logo -->
             <div class="login-header">
-                <span class="logo-icon">✨</span>
-                <h1 class="logo-text">Nayuki Admin</h1>
+                <span class="logo-mark" aria-hidden="true"></span>
+                <h1 class="logo-text">Nayuki <span class="logo-thin">Admin</span></h1>
                 <p class="logo-subtitle">博客管理后台</p>
             </div>
 
@@ -197,6 +221,26 @@ function enterPreviewMode() {
                 </template>
             </button>
 
+            <!-- 开发模式入口（仅本地 dev 构建显示，无需 GitHub 验证） -->
+            <button v-if="isLocalDev" class="dev-btn" @click="enterDevMode">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>开发模式 · 直接进入</span>
+                <span class="dev-badge">DEV</span>
+            </button>
+
             <!-- 分隔线 -->
             <div class="divider">
                 <span>或</span>
@@ -237,6 +281,7 @@ function enterPreviewMode() {
 
         <!-- 底部版权 -->
         <footer class="login-footer">
+            <span class="footer-mark" aria-hidden="true"></span>
             <p>© 2026 Nayuki Blog. All rights reserved.</p>
         </footer>
     </div>
@@ -250,12 +295,12 @@ function enterPreviewMode() {
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f4f5fa;
     position: relative;
     overflow: hidden;
 }
 
-/* 背景装饰 */
+/* ===== 背景几何装饰 ===== */
 .bg-decoration {
     position: absolute;
     inset: 0;
@@ -263,51 +308,191 @@ function enterPreviewMode() {
     pointer-events: none;
 }
 
-.bg-circle {
+/* 细线网格 */
+.bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(20, 22, 31, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 22, 31, 0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.25) 75%);
+    mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.25) 75%);
+}
+
+/* 极光光斑 */
+.bg-aurora {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    filter: blur(110px);
 }
 
-.bg-circle-1 {
-    width: 400px;
-    height: 400px;
-    top: -100px;
-    left: -100px;
+.bg-aurora-1 {
+    top: -18vmax;
+    right: -8vmax;
+    width: 44vmax;
+    height: 44vmax;
+    background: radial-gradient(circle, rgba(147, 169, 201, 0.18), transparent 70%);
+    animation: auroraDrift 24s ease-in-out infinite alternate;
 }
 
-.bg-circle-2 {
-    width: 300px;
-    height: 300px;
-    bottom: -50px;
-    right: -50px;
+.bg-aurora-2 {
+    bottom: -16vmax;
+    left: -10vmax;
+    width: 38vmax;
+    height: 38vmax;
+    background: radial-gradient(circle, rgba(147, 169, 201, 0.12), transparent 70%);
+    animation: auroraDrift 30s ease-in-out infinite alternate-reverse;
 }
 
-.bg-circle-3 {
-    width: 200px;
-    height: 200px;
+@keyframes auroraDrift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-6%, 8%, 0) scale(1.08); }
+}
+
+/* 描边圆环 */
+.bg-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(20, 22, 31, 0.08);
+}
+
+.bg-ring-1 {
+    top: -120px;
+    right: -100px;
+    width: 380px;
+    height: 380px;
+    border-width: 1.5px;
+    animation: slowSpinFloat 26s ease-in-out infinite alternate;
+}
+
+.bg-ring-2 {
+    bottom: 8%;
+    left: 6%;
+    width: 150px;
+    height: 150px;
+    border-style: dashed;
+    border-color: rgba(76, 86, 112, 0.2);
+    animation: slowSpin 60s linear infinite;
+}
+
+/* 45° 方形 */
+.bg-square {
+    position: absolute;
+    top: 22%;
+    left: 12%;
+    width: 68px;
+    height: 68px;
+    border: 1.5px solid rgba(20, 22, 31, 0.09);
+    border-radius: 10px;
+    transform: rotate(45deg);
+    animation: floatA 20s ease-in-out infinite alternate;
+}
+
+/* 三角形 */
+.bg-triangle {
+    position: absolute;
+    bottom: 20%;
+    right: 14%;
+    width: 56px;
+    height: 56px;
+    animation: floatB 17s ease-in-out infinite alternate;
+}
+
+/* 十字标记 */
+.bg-cross {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+}
+
+.bg-cross::before,
+.bg-cross::after {
+    content: '';
+    position: absolute;
+    background: rgba(20, 22, 31, 0.16);
+}
+
+.bg-cross::before {
+    left: 50%;
+    top: 0;
+    width: 1.5px;
+    height: 100%;
+}
+
+.bg-cross::after {
     top: 50%;
-    left: 60%;
-    transform: translate(-50%, -50%);
+    left: 0;
+    width: 100%;
+    height: 1.5px;
 }
 
-/* 登录卡片 */
+.bg-cross-1 { top: 16%; right: 30%; }
+.bg-cross-2 { bottom: 12%; left: 32%; }
+
+/* 主题色圆点 */
+.bg-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.bg-dot-1 {
+    top: 40%;
+    left: 7%;
+    background: rgba(76, 86, 112, 0.35);
+}
+
+.bg-dot-2 {
+    top: 24%;
+    right: 8%;
+    background: rgba(147, 169, 201, 0.6);
+}
+
+@keyframes slowSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes slowSpinFloat {
+    from { transform: translateY(0); }
+    to { transform: translateY(20px); }
+}
+
+@keyframes floatA {
+    from { transform: rotate(45deg) translateY(0); }
+    to { transform: rotate(56deg) translateY(-14px); }
+}
+
+@keyframes floatB {
+    from { transform: translateY(0) rotate(0deg); }
+    to { transform: translateY(12px) rotate(-7deg); }
+}
+
+/* ===== 登录卡片 ===== */
 .login-card {
     width: 100%;
     max-width: 400px;
-    background: white;
-    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
     padding: 3rem 2.5rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow:
+        0 1px 2px rgba(23, 25, 35, 0.04),
+        0 24px 60px -16px rgba(23, 25, 35, 0.18);
     position: relative;
     z-index: 10;
-    animation: slideUp 0.5s ease-out;
+    animation: slideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
 }
+
 
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(24px);
     }
     to {
         opacity: 1;
@@ -320,23 +505,50 @@ function enterPreviewMode() {
     margin-bottom: 2rem;
 }
 
-.logo-icon {
-    font-size: 3rem;
+/* 几何 Logo 标记 */
+.logo-mark {
+    position: relative;
     display: block;
-    margin-bottom: 0.75rem;
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 1.125rem;
+    border-radius: 13px;
+    background: #4c5670;
+    transform: rotate(45deg);
+    box-shadow: 0 12px 32px -8px rgba(76, 86, 112, 0.35);
+    transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: 13px;
+    border-radius: 50%;
+    background: #ffffff;
+}
+
+.login-header:hover .logo-mark {
+    transform: rotate(225deg);
 }
 
 .logo-text {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1e293b;
+    letter-spacing: -0.01em;
+    color: #1a1d24;
     margin: 0;
+}
+
+.logo-thin {
+    font-weight: 500;
+    color: #93a9c9;
 }
 
 .logo-subtitle {
     font-size: 0.875rem;
-    color: #64748b;
+    color: #8b91a5;
     margin-top: 0.5rem;
+    letter-spacing: 0.06em;
 }
 
 /* 错误提示 */
@@ -347,7 +559,7 @@ function enterPreviewMode() {
     padding: 0.75rem 1rem;
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 0.5rem;
+    border-radius: 12px;
     color: #dc2626;
     font-size: 0.875rem;
     margin-bottom: 1.5rem;
@@ -361,20 +573,20 @@ function enterPreviewMode() {
     justify-content: center;
     gap: 0.75rem;
     padding: 0.875rem 1.5rem;
-    background: #24292f;
+    background: #1b1f27;
     color: white;
     font-size: 1rem;
     font-weight: 500;
     border: none;
-    border-radius: 0.75rem;
+    border-radius: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .login-btn:hover:not(:disabled) {
-    background: #32383f;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #262b38;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -10px rgba(20, 22, 31, 0.45);
 }
 
 .login-btn:active:not(:disabled) {
@@ -386,12 +598,52 @@ function enterPreviewMode() {
     cursor: not-allowed;
 }
 
+/* 开发模式按钮（渐变，仅 dev 构建显示） */
+.dev-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    margin-top: 0.75rem;
+    padding: 0.8rem 1.5rem;
+    background: #4c5670;
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 8px 24px -10px rgba(76, 86, 112, 0.3);
+}
+
+.dev-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow: 0 14px 32px -10px rgba(76, 86, 112, 0.35);
+}
+
+.dev-btn:active {
+    transform: translateY(0);
+}
+
+.dev-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.125rem 0.45rem;
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+}
+
 /* 分隔线 */
 .divider {
     display: flex;
     align-items: center;
     margin: 1.5rem 0;
-    color: #94a3b8;
+    color: #8b91a5;
     font-size: 0.75rem;
 }
 
@@ -400,7 +652,7 @@ function enterPreviewMode() {
     content: "";
     flex: 1;
     height: 1px;
-    background: #e2e8f0;
+    background: linear-gradient(90deg, transparent, #e3e6f0, transparent);
 }
 
 .divider span {
@@ -416,23 +668,24 @@ function enterPreviewMode() {
     gap: 0.75rem;
     padding: 0.75rem 1.5rem;
     background: white;
-    color: #64748b;
+    color: #4e5567;
     font-size: 0.875rem;
     font-weight: 500;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    border: 1px solid #e3e6f0;
+    border-radius: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .preview-btn:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    color: #475569;
+    background: #f2f4f8;
+    border-color: #bcc8d9;
+    color: #4c5670;
+    transform: translateY(-1px);
 }
 
 .note-hint {
-    color: #94a3b8;
+    color: #8b91a5;
     font-style: italic;
 }
 
@@ -455,28 +708,65 @@ function enterPreviewMode() {
 .login-note {
     margin-top: 1.5rem;
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: #8b91a5;
     text-align: center;
-    line-height: 1.6;
+    line-height: 1.7;
 }
 
 /* 底部版权 */
 .login-footer {
     position: absolute;
     bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #8b91a5;
     font-size: 0.75rem;
+}
+
+.login-footer p {
+    margin: 0;
+}
+
+.footer-mark {
+    width: 8px;
+    height: 8px;
+    border-radius: 2.5px;
+    background: #4c5670;
+    transform: rotate(45deg);
+    opacity: 0.85;
+}
+
+/* 减少动效 */
+@media (prefers-reduced-motion: reduce) {
+    .bg-aurora-1,
+    .bg-aurora-2,
+    .bg-ring-1,
+    .bg-ring-2,
+    .bg-square,
+    .bg-triangle,
+    .login-card,
+    .logo-mark {
+        animation: none;
+        transition: none;
+    }
 }
 
 /* 响应式 */
 @media (max-width: 480px) {
     .login-card {
         padding: 2rem 1.5rem;
-        border-radius: 1rem;
+        border-radius: 18px;
     }
 
-    .logo-icon {
-        font-size: 2.5rem;
+    .logo-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+    }
+
+    .logo-mark::after {
+        inset: 11px;
     }
 
     .logo-text {

@@ -1,6 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
+// 本地开发模式：vite dev 构建下无需 GitHub 验证即可访问全部页面
+// （生产构建 import.meta.env.DEV 恒为 false，不影响线上鉴权）
+function isLocalDevMode(): boolean {
+  return import.meta.env.DEV;
+}
+
 // 开发预览模式：允许未登录状态下访问页面进行样式测试
 // 在 URL 中添加 ?preview=true 或设置 localStorage.setItem('dev_preview', 'true')
 function isDevPreviewMode(): boolean {
@@ -111,8 +117,8 @@ router.beforeEach((to, _from, next) => {
     ? `${to.meta.title} - Nayuki Admin`
     : "Nayuki Admin";
 
-  // 开发预览模式：允许未登录访问所有页面
-  if (isDevPreviewMode()) {
+  // 本地开发模式 / 开发预览模式：允许未登录访问所有页面
+  if (isLocalDevMode() || isDevPreviewMode()) {
     next();
     return;
   }
@@ -129,6 +135,6 @@ router.beforeEach((to, _from, next) => {
   }
 });
 
-// 导出开发预览模式检查函数供其他组件使用
-export { isDevPreviewMode };
+// 导出开发预览模式 / 本地开发模式检查函数供其他组件使用
+export { isDevPreviewMode, isLocalDevMode };
 export default router;

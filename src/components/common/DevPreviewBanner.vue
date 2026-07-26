@@ -17,6 +17,9 @@ const emit = defineEmits<{
 
 const router = useRouter();
 
+// 本地开发构建标记（vite dev 下为 true）
+const isLocalDev = import.meta.env.DEV;
+
 function exitPreviewMode() {
   localStorage.removeItem("dev_preview");
   emit("exitPreview");
@@ -54,6 +57,36 @@ function goToLogin() {
       <span v-else>登录</span>
     </span>
     <button class="exit-preview-btn" @click="exitPreviewMode">退出预览</button>
+  </div>
+
+  <!-- 本地开发模式提示（vite dev 构建，无需 GitHub 验证） -->
+  <div
+    v-else-if="!isPreviewMode && !isLoggedIn && isLocalDev"
+    class="dev-preview-banner dev"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="banner-icon"
+    >
+      <polyline points="16 18 22 12 16 6"></polyline>
+      <polyline points="8 6 2 12 8 18"></polyline>
+    </svg>
+    <span class="banner-text">
+      本地开发模式 - 已跳过 GitHub 验证，数据功能需要
+      <router-link v-if="showLoginLink" to="/login" class="banner-link"
+        >登录</router-link
+      >
+      <span v-else>登录</span>
+    </span>
+    <span class="dev-tag">DEV</span>
   </div>
 
   <!-- 未登录提示（非预览模式） -->
@@ -98,17 +131,35 @@ function goToLogin() {
 .dev-preview-banner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 14px;
   font-size: 0.875rem;
   margin-bottom: 1rem;
+  animation: bannerIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bannerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dev-preview-banner.preview {
-  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
+  background: rgba(147, 169, 201, 0.12);
+  border: 1px solid rgba(76, 86, 112, 0.22);
+  color: #414a61;
+}
+
+.dev-preview-banner.dev {
+  background: rgba(147, 169, 201, 0.12);
+  border: 1px dashed rgba(76, 86, 112, 0.35);
+  color: #414a61;
 }
 
 .dev-preview-banner.warning {
@@ -136,23 +187,42 @@ function goToLogin() {
   opacity: 0.8;
 }
 
+.dev-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.55rem;
+  background: #4c5670;
+  color: #ffffff;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
 .exit-preview-btn {
-  padding: 0.375rem 0.75rem;
+  padding: 0.375rem 0.875rem;
   background: white;
   border: 1px solid currentColor;
-  border-radius: 0.375rem;
+  border-radius: 999px;
   color: inherit;
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   white-space: nowrap;
 }
 
 .exit-preview-btn:hover {
-  background: #1e40af;
-  border-color: #1e40af;
+  background: #4c5670;
+  border-color: transparent;
   color: white;
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-preview-banner {
+    animation: none;
+  }
 }
 
 @media (max-width: 640px) {
