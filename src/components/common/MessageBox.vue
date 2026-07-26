@@ -76,10 +76,23 @@ const typeConfig = {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 14px;
   border: 1px solid;
   margin-bottom: 16px;
   font-size: 14px;
+  box-shadow: 0 2px 8px -2px rgba(23, 25, 35, 0.06);
+  animation: messageIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .message-icon {
@@ -116,11 +129,24 @@ const typeConfig = {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 7px;
+  transition:
+    opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .close-btn:hover {
   opacity: 1;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(20, 22, 31, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-box {
+    animation: none;
+  }
+
+  .close-btn {
+    transition: none;
+  }
 }
 </style>

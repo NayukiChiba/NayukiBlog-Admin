@@ -120,22 +120,25 @@ function hasChildren(node: CategoryNode): boolean {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition:
+    background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .node-content:hover {
-  background: #f3f4f6;
+  background: #f2f4f8;
 }
 
+/* 选中项：雾蓝浅底 + 主题文字 */
 .node-content.is-selected {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 .node-content.is-selected .folder-icon {
-  color: #6366f1;
+  color: #4c5670;
 }
 
 .expand-btn {
@@ -148,14 +151,31 @@ function hasChildren(node: CategoryNode): boolean {
   border: none;
   background: none;
   cursor: pointer;
-  color: #6b7280;
-  border-radius: 4px;
+  color: #8b91a5;
+  border-radius: 5px;
   flex-shrink: 0;
+  transition:
+    background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .expand-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: #eaeef4;
+  color: #4c5670;
+}
+
+/* 展开箭头旋转过渡：按压时预旋转，与展开后的图标方向无缝衔接 */
+.expand-btn .svg-icon {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.expand-btn:active .svg-icon {
+  transform: rotate(90deg);
+}
+
+/* 已展开节点（存在子级容器）按压时反向旋转收起 */
+.tree-node:has(> .node-children) > .node-content .expand-btn:active .svg-icon {
+  transform: rotate(-90deg);
 }
 
 .expand-placeholder {
@@ -164,8 +184,9 @@ function hasChildren(node: CategoryNode): boolean {
 }
 
 .folder-icon {
-  color: #9ca3af;
+  color: #8b91a5;
   flex-shrink: 0;
+  transition: color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .node-name {
@@ -179,6 +200,19 @@ function hasChildren(node: CategoryNode): boolean {
 .node-children {
   margin-left: 24px;
   padding-left: 8px;
-  border-left: 1px dashed #e5e7eb;
+  border-left: 1px dashed #e3e6f0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node-content,
+  .expand-btn,
+  .expand-btn .svg-icon,
+  .folder-icon {
+    transition: none;
+  }
+
+  .expand-btn:active .svg-icon {
+    transform: none;
+  }
 }
 </style>

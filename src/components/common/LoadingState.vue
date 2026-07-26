@@ -19,9 +19,9 @@ defineProps<{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
-  color: #6b7280;
-  gap: 12px;
+  padding: 52px 24px;
+  color: #8b91a5;
+  gap: 14px;
 }
 
 .loading-small {
@@ -32,30 +32,32 @@ defineProps<{
   padding: 64px 32px;
 }
 
+/* 单色描边圆环 spinner */
 .spinner {
+  --ring-width: 3px;
   width: 32px;
   height: 32px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #6366f1;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  border: var(--ring-width) solid #e6e8ee;
+  border-top-color: #4c5670;
+  animation: spin 0.9s linear infinite;
 }
 
 .loading-small .spinner {
+  --ring-width: 2px;
   width: 20px;
   height: 20px;
-  border-width: 2px;
 }
 
 .loading-large .spinner {
+  --ring-width: 4px;
   width: 48px;
   height: 48px;
-  border-width: 4px;
 }
 
 .loading-text {
   font-size: 14px;
-  color: #6b7280;
+  color: #8b91a5;
 }
 
 .loading-small .loading-text {
@@ -69,6 +71,12 @@ defineProps<{
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1.6s;
   }
 }
 </style>

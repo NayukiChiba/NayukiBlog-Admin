@@ -43,38 +43,65 @@ function onOverlayClick() {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 17, 28, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  animation: overlayIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .modal {
+  position: relative;
   background: white;
-  border-radius: 12px;
+  border-radius: 20px;
   width: 100%;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 1px 2px rgba(23, 25, 35, 0.04),
+    0 24px 60px -16px rgba(23, 25, 35, 0.28);
+  animation: modalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 22px;
+  border-bottom: 1px solid #edeff7;
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  letter-spacing: -0.01em;
+  color: #14161f;
   margin: 0;
 }
 
@@ -82,7 +109,7 @@ function onOverlayClick() {
   background: none;
   border: none;
   font-size: 24px;
-  color: #6b7280;
+  color: #8b91a5;
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -91,24 +118,25 @@ function onOverlayClick() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: 9px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .close-btn:hover {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: #eaeef4;
+  color: #4c5670;
+  transform: rotate(90deg);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 20px 22px;
   overflow-y: auto;
   flex: 1;
 }
 
 .modal-footer {
-  padding: 16px 20px;
-  border-top: 1px solid #e5e7eb;
+  padding: 16px 22px;
+  border-top: 1px solid #edeff7;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -127,6 +155,21 @@ function onOverlayClick() {
 
   .modal-overlay {
     padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal {
+    animation: none;
+  }
+
+  .close-btn {
+    transition: none;
+  }
+
+  .close-btn:hover {
+    transform: none;
   }
 }
 </style>

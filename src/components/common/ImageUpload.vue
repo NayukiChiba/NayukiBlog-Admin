@@ -173,10 +173,19 @@ function clearError() {
 
 .image-preview-item {
   position: relative;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  background: #f3f4f6;
+  background: #eef0f8;
+  border: 1px solid #edeff7;
+  transition:
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.image-preview-item:hover {
+  border-color: #d8dce6;
+  box-shadow: 0 8px 24px -8px rgba(23, 25, 35, 0.16);
 }
 
 .image-preview-item img {
@@ -194,13 +203,15 @@ function clearError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(15, 17, 28, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .image-preview-item:hover .remove-btn {
@@ -211,16 +222,24 @@ function clearError() {
   background: rgba(239, 68, 68, 0.9);
 }
 
+/* 拖放区：虚线边框，hover / 拖拽激活时主题化 */
 .add-image-area {
-  border: 2px dashed #e5e7eb;
-  border-radius: 8px;
+  border: 2px dashed #e3e6f0;
+  border-radius: 16px;
   padding: 16px;
-  transition: all 0.2s;
+  transition:
+    border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.add-image-area:hover {
+  border-color: #bcc8d9;
+  background: #f5f7fa;
 }
 
 .add-image-area.is-dragging {
-  border-color: #6366f1;
-  background: #eef2ff;
+  border-color: #4c5670;
+  background: #eaeef4;
 }
 
 .input-row {
@@ -231,19 +250,24 @@ function clearError() {
 .url-input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  background: white;
+  color: #14161f;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .url-input:focus {
-  border-color: #6366f1;
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
 }
 
 .url-input::placeholder {
-  color: #9ca3af;
+  color: #8b91a5;
 }
 
 .add-btn {
@@ -252,27 +276,31 @@ function clearError() {
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: #6366f1;
+  background: #4c5670;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   flex-shrink: 0;
+  box-shadow: 0 4px 12px -6px rgba(76, 86, 112, 0.35);
 }
 
 .add-btn:hover:not(:disabled) {
-  background: #4f46e5;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 10px 24px -10px rgba(26, 29, 36, 0.24);
 }
 
 .add-btn:disabled {
-  background: #d1d5db;
+  background: #cdd2e0;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
 .hint {
   font-size: 12px;
-  color: #9ca3af;
+  color: #8b91a5;
   margin: 8px 0 0 0;
   text-align: center;
 }
@@ -286,6 +314,20 @@ function clearError() {
 @media (max-width: 480px) {
   .image-preview-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-preview-item,
+  .remove-btn,
+  .add-image-area,
+  .url-input,
+  .add-btn {
+    transition: none;
+  }
+
+  .add-btn:hover:not(:disabled) {
+    transform: none;
   }
 }
 </style>

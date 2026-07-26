@@ -32,7 +32,7 @@ defineProps<{
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: #4e5567;
   margin-bottom: 6px;
 }
 
@@ -43,7 +43,7 @@ defineProps<{
 
 .form-hint {
   font-size: 12px;
-  color: #6b7280;
+  color: #8b91a5;
   margin: 4px 0 0 0;
 }
 
@@ -65,6 +65,6 @@ defineProps<{
 .has-error :deep(textarea:focus),
 .has-error :deep(select:focus) {
   border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 </style>

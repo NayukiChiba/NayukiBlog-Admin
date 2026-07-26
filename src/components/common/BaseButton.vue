@@ -30,10 +30,10 @@ defineProps<{
   justify-content: center;
   gap: 8px;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   white-space: nowrap;
 }
 
@@ -46,6 +46,7 @@ defineProps<{
 .btn-small {
   padding: 6px 12px;
   font-size: 12px;
+  border-radius: 10px;
 }
 
 .btn-medium {
@@ -56,6 +57,7 @@ defineProps<{
 .btn-large {
   padding: 12px 24px;
   font-size: 16px;
+  border-radius: 14px;
 }
 
 /* Icon button */
@@ -78,24 +80,38 @@ defineProps<{
 }
 
 /* Variants */
+/* 主按钮：雾蓝纯色底 + 白字，hover 上浮加深 */
 .btn-primary {
-  background: #6366f1;
+  background: #4c5670;
   color: white;
+  box-shadow: 0 4px 14px -6px rgba(76, 86, 112, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4f46e5;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 12px 32px -12px rgba(26, 29, 36, 0.24);
 }
 
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* 次按钮：白底描边，hover 主题化 */
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: white;
+  border: 1px solid #e3e6f0;
+  color: #4e5567;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: #f5f7fa;
+  border-color: #bcc8d9;
+  color: #414a61;
+  transform: translateY(-1px);
 }
 
+/* 危险按钮：保留红色语义 */
 .btn-danger {
   background: #ef4444;
   color: white;
@@ -103,27 +119,30 @@ defineProps<{
 
 .btn-danger:hover:not(:disabled) {
   background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -10px rgba(239, 68, 68, 0.5);
 }
 
 .btn-outline {
   background: transparent;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  border: 1px solid #e3e6f0;
+  color: #4e5567;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: #f5f7fa;
+  border-color: #bcc8d9;
+  color: #414a61;
 }
 
 .btn-ghost {
   background: transparent;
-  color: #6b7280;
+  color: #8b91a5;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: #f3f4f6;
-  color: #374151;
+  background: #f2f4f8;
+  color: #4c5670;
 }
 
 /* Loading */
@@ -154,6 +173,18 @@ defineProps<{
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .spinner {
+    transition: none;
+    animation: none;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: none;
   }
 }
 </style>

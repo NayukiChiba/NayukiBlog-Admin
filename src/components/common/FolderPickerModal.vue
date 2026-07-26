@@ -234,19 +234,20 @@ function getCategoryDisplayName(path: string): string {
   gap: 16px;
 }
 
+/* 当前选择：雾蓝浅底 */
 .current-selection {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: #f0fdf4;
-  border-radius: 8px;
-  border: 1px solid #bbf7d0;
+  background: #eaeef4;
+  border-radius: 12px;
+  border: 1px solid #dbe2eb;
 }
 
 .selection-label {
   font-size: 14px;
-  color: #6b7280;
+  color: #8b91a5;
 }
 
 .selection-path {
@@ -255,16 +256,16 @@ function getCategoryDisplayName(path: string): string {
   gap: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #16a34a;
+  color: #4c5670;
 }
 
 .folder-tree-container {
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border: 1px solid #e3e6f0;
+  border-radius: 12px;
   padding: 12px;
-  background: #fafafa;
+  background: #f7f8fc;
 }
 
 .path-preview {
@@ -272,24 +273,24 @@ function getCategoryDisplayName(path: string): string {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  background: #f9fafb;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  background: #f7f8fc;
+  border-radius: 10px;
+  border: 1px solid #edeff7;
 }
 
 .preview-label {
   font-size: 13px;
-  color: #6b7280;
+  color: #8b91a5;
   flex-shrink: 0;
 }
 
 .preview-path {
   font-size: 13px;
-  color: #4f46e5;
-  font-family: "SF Mono", Monaco, "Courier New", monospace;
-  background: #eef2ff;
+  color: #4c5670;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #eaeef4;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   word-break: break-all;
 }
 
@@ -300,19 +301,19 @@ function getCategoryDisplayName(path: string): string {
   gap: 8px;
   width: 100%;
   padding: 12px;
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
+  border: 2px dashed #cdd2e0;
+  border-radius: 12px;
   background: none;
-  color: #6b7280;
+  color: #8b91a5;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .create-folder-btn:hover {
-  border-color: #6366f1;
-  color: #6366f1;
-  background: #eef2ff;
+  border-color: #93a9c9;
+  color: #4c5670;
+  background: #f5f7fa;
 }
 
 /* 创建文件夹模式 */
@@ -329,17 +330,17 @@ function getCategoryDisplayName(path: string): string {
   padding: 8px 12px;
   border: none;
   background: none;
-  color: #6b7280;
+  color: #8b91a5;
   font-size: 14px;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: 9px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   align-self: flex-start;
 }
 
 .back-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 .form-field {
@@ -351,30 +352,32 @@ function getCategoryDisplayName(path: string): string {
 .field-label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: #4e5567;
 }
 
 .field-select,
 .field-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   font-size: 14px;
-  color: #1f2937;
+  color: #14161f;
   background: white;
-  transition: all 0.2s;
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .field-select:focus,
 .field-input:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
 }
 
 .field-input::placeholder {
-  color: #9ca3af;
+  color: #8b91a5;
 }
 
 /* 按钮样式 */
@@ -384,11 +387,11 @@ function getCategoryDisplayName(path: string): string {
   justify-content: center;
   gap: 6px;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   border: none;
 }
 
@@ -398,20 +401,40 @@ function getCategoryDisplayName(path: string): string {
 }
 
 .btn-primary {
-  background: #6366f1;
+  background: #4c5670;
   color: white;
+  box-shadow: 0 4px 14px -6px rgba(76, 86, 112, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4f46e5;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 12px 32px -12px rgba(26, 29, 36, 0.24);
 }
 
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: white;
+  border: 1px solid #e3e6f0;
+  color: #4e5567;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: #f5f7fa;
+  border-color: #bcc8d9;
+  color: #414a61;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .create-folder-btn,
+  .back-btn,
+  .field-select,
+  .field-input,
+  .btn {
+    transition: none;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: none;
+  }
 }
 </style>

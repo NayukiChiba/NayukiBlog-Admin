@@ -250,8 +250,9 @@ watch(
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
+  background: #f7f8fc;
+  border: 1px solid #edeff7;
+  border-radius: 12px;
   margin-bottom: 1rem;
 }
 
@@ -261,17 +262,17 @@ watch(
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #1e293b;
+  color: #14161f;
 }
 
 .repo-badge svg {
-  color: #64748b;
+  color: #8b91a5;
 }
 
 .branch-badge {
   padding: 0.125rem 0.5rem;
-  background: #dbeafe;
-  color: #2563eb;
+  background: #eaeef4;
+  color: #4c5670;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -285,15 +286,15 @@ watch(
   height: 32px;
   border: none;
   background: transparent;
-  border-radius: 0.375rem;
-  color: #64748b;
+  border-radius: 9px;
+  color: #8b91a5;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .icon-btn:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 /* 消息提示 */
@@ -303,7 +304,7 @@ watch(
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -311,13 +312,13 @@ watch(
 .error-message {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  color: #dc2626;
+  color: #ef4444;
 }
 
 .success-message {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
-  color: #16a34a;
+  color: #10b981;
 }
 
 /* 变更区域 */
@@ -338,7 +339,7 @@ watch(
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: #4e5567;
   margin: 0;
 }
 
@@ -349,7 +350,7 @@ watch(
   min-width: 20px;
   height: 20px;
   padding: 0 0.375rem;
-  background: #2563eb;
+  background: #4c5670;
   color: white;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -362,9 +363,9 @@ watch(
   color: #ef4444;
   background: transparent;
   border: 1px solid #fecaca;
-  border-radius: 0.375rem;
+  border-radius: 9px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .clear-btn:hover {
@@ -378,13 +379,13 @@ watch(
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
-  border: 2px dashed #e2e8f0;
+  background: #f7f8fc;
+  border-radius: 14px;
+  border: 2px dashed #e3e6f0;
 }
 
 .empty-state svg {
-  color: #94a3b8;
+  color: #8b91a5;
   margin-bottom: 0.75rem;
 }
 
@@ -392,12 +393,12 @@ watch(
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: #64748b;
+  color: #4e5567;
 }
 
 .empty-hint {
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: #8b91a5;
   margin-top: 0.25rem;
 }
 
@@ -415,9 +416,17 @@ watch(
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  background: #f7f8fc;
+  border-radius: 12px;
+  border: 1px solid #e3e6f0;
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.change-item:hover {
+  border-color: #d8dce6;
+  background: #f2f4f8;
 }
 
 .change-type {
@@ -426,7 +435,7 @@ watch(
   justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 0.375rem;
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 700;
   flex-shrink: 0;
@@ -440,7 +449,7 @@ watch(
 .change-file {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #1e293b;
+  color: #14161f;
   margin-bottom: 0.125rem;
 }
 
@@ -449,7 +458,7 @@ watch(
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #8b91a5;
   margin-bottom: 0.25rem;
 }
 
@@ -465,7 +474,7 @@ watch(
 
 .change-desc {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: #4e5567;
 }
 
 .remove-btn {
@@ -476,10 +485,10 @@ watch(
   height: 24px;
   border: none;
   background: transparent;
-  border-radius: 0.25rem;
-  color: #94a3b8;
+  border-radius: 7px;
+  color: #8b91a5;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   flex-shrink: 0;
 }
 
@@ -497,7 +506,7 @@ watch(
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #475569;
+  color: #4e5567;
   margin-bottom: 0.5rem;
 }
 
@@ -505,20 +514,29 @@ watch(
   width: 100%;
   padding: 0.75rem;
   font-size: 0.875rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  background: white;
+  color: #14161f;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   resize: vertical;
   font-family: inherit;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .commit-input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
+}
+
+.commit-input::placeholder {
+  color: #8b91a5;
 }
 
 .commit-input:disabled {
-  background: #f8fafc;
+  background: #f7f8fc;
   cursor: not-allowed;
 }
 
@@ -530,11 +548,11 @@ watch(
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn:disabled {
@@ -543,21 +561,27 @@ watch(
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: #4c5670;
   color: white;
+  box-shadow: 0 4px 14px -6px rgba(76, 86, 112, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
+  transform: translateY(-1px);
+  background: #414a61;
+  box-shadow: 0 12px 32px -12px rgba(26, 29, 36, 0.24);
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: white;
+  border: 1px solid #e3e6f0;
+  color: #4e5567;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e2e8f0;
+  background: #f5f7fa;
+  border-color: #bcc8d9;
+  color: #414a61;
 }
 
 .btn-spinner {
@@ -572,6 +596,25 @@ watch(
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-btn,
+  .clear-btn,
+  .change-item,
+  .remove-btn,
+  .commit-input,
+  .btn {
+    transition: none;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .btn-spinner {
+    animation: none;
   }
 }
 </style>

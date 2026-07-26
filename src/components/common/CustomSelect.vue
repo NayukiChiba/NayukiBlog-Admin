@@ -204,44 +204,48 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 10px 14px;
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid #e3e6f0;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .custom-select:not(.disabled) .select-trigger:hover {
-  border-color: #a5b4fc;
+  border-color: #bcc8d9;
   background-color: #fafbff;
 }
 
+/* 打开状态：主题描边 + 光环 */
 .custom-select.open .select-trigger {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #4c5670;
+  box-shadow: 0 0 0 3px rgba(76, 86, 112, 0.14);
 }
 
 .custom-select.disabled .select-trigger {
-  background-color: #f1f5f9;
+  background-color: #eef0f8;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
 .select-value {
   flex: 1;
-  color: #1f2937;
+  color: #14161f;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .select-value.placeholder {
-  color: #9ca3af;
+  color: #8b91a5;
 }
 
 .select-arrow {
   flex-shrink: 0;
-  color: #6366f1;
-  transition: transform 0.2s ease;
+  color: #4c5670;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   margin-left: 8px;
 }
 
@@ -250,7 +254,14 @@ onUnmounted(() => {
 }
 
 .custom-select.disabled .select-arrow {
-  color: #94a3b8;
+  color: #8b91a5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-trigger,
+  .select-arrow {
+    transition: none;
+  }
 }
 </style>
 
@@ -258,11 +269,11 @@ onUnmounted(() => {
 /* Global styles for teleported dropdown */
 .select-dropdown.custom-select-dropdown-teleported {
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border: 1px solid #e3e6f0;
+  border-radius: 12px;
   box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    0 1px 2px rgba(23, 25, 35, 0.04),
+    0 16px 40px -12px rgba(23, 25, 35, 0.18);
   z-index: 9999;
   overflow: hidden;
   overflow-y: auto;
@@ -274,17 +285,21 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 10px 14px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition:
+    background-color 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.15s cubic-bezier(0.22, 1, 0.36, 1);
   font-size: 14px;
-  color: #1f2937;
+  color: #14161f;
 }
 
 .select-dropdown.custom-select-dropdown-teleported .select-option:hover {
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  background: #eaeef4;
+  color: #4c5670;
 }
 
+/* 选中项：雾蓝纯色底 + 白字 */
 .select-dropdown.custom-select-dropdown-teleported .select-option.selected {
-  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  background: #4c5670;
   color: white;
 }
 
@@ -300,14 +315,16 @@ onUnmounted(() => {
 /* Dropdown animation */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.2s ease;
+  transition:
+    opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: top center;
 }
 
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;
-  transform: scaleY(0.9) translateY(-4px);
+  transform: scaleY(0.94) translateY(-5px);
 }
 
 /* Custom scrollbar for dropdown */
@@ -316,16 +333,24 @@ onUnmounted(() => {
 }
 
 .select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f4f5fa;
   border-radius: 3px;
 }
 
 .select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #cdd2e0;
   border-radius: 3px;
 }
 
 .select-dropdown.custom-select-dropdown-teleported::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #bcc8d9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-dropdown.custom-select-dropdown-teleported .select-option,
+  .dropdown-enter-active,
+  .dropdown-leave-active {
+    transition: none;
+  }
 }
 </style>
