@@ -117,8 +117,10 @@ const breadcrumbs = computed(() => {
 <style scoped>
 .header {
   height: 64px;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border-bottom: 1px solid #edeff7;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -145,22 +147,22 @@ const breadcrumbs = computed(() => {
   height: 40px;
   border: none;
   background: transparent;
-  border-radius: 0.5rem;
-  color: #64748b;
+  border-radius: 12px;
+  color: #6a7185;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .menu-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: #f2f4f8;
+  color: #1a1d24;
 }
 
 .header-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   flex: 1;
   min-width: 0;
 }
@@ -173,27 +175,28 @@ const breadcrumbs = computed(() => {
 }
 
 .breadcrumb-link {
-  color: #64748b;
+  color: #9096a5;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .breadcrumb-link:hover {
-  color: #2563eb;
+  color: #4c5670;
 }
 
 .breadcrumb-separator {
-  color: #cbd5e1;
+  color: #d0d4de;
 }
 
 .breadcrumb-current {
-  color: #94a3b8;
+  color: #4b5162;
 }
 
 .page-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b;
+  letter-spacing: -0.01em;
+  color: #1a1d24;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -212,18 +215,20 @@ const breadcrumbs = computed(() => {
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
-  border-radius: 0.5rem;
-  color: #64748b;
+  border-radius: 12px;
+  color: #6a7185;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .header-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: #f2f4f8;
+  border-color: #e6e8ee;
+  color: #1a1d24;
+  transform: translateY(-1px);
 }
 
 /* 响应式 */

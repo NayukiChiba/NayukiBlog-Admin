@@ -12,7 +12,7 @@ const showLayout = computed(() => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-slate-50">
+  <div id="app" class="min-h-screen bg-dark-50">
     <!-- 带侧边栏的管理布局 -->
     <AdminLayout v-if="showLayout">
       <router-view v-slot="{ Component }">

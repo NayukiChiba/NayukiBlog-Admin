@@ -16,6 +16,13 @@ onMounted(async () => {
 
 <template>
   <div class="admin-layout">
+    <!-- 背景几何装饰（细线网格 + 极光光斑） -->
+    <div class="layout-decor" aria-hidden="true">
+      <div class="layout-grid geo-grid-bg"></div>
+      <div class="layout-aurora layout-aurora-1"></div>
+      <div class="layout-aurora layout-aurora-2"></div>
+    </div>
+
     <!-- 侧边栏 -->
     <Sidebar />
 
@@ -36,7 +43,44 @@ onMounted(async () => {
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #f4f5fa;
+  position: relative;
+}
+
+/* ===== 背景装饰层 ===== */
+.layout-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.layout-grid {
+  position: absolute;
+  inset: 0;
+}
+
+.layout-aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+}
+
+.layout-aurora-1 {
+  top: -22vmax;
+  right: -12vmax;
+  width: 42vmax;
+  height: 42vmax;
+  background: radial-gradient(circle, rgba(147, 169, 201, 0.13), transparent 70%);
+}
+
+.layout-aurora-2 {
+  bottom: -18vmax;
+  left: 8vmax;
+  width: 36vmax;
+  height: 36vmax;
+  background: radial-gradient(circle, rgba(147, 169, 201, 0.09), transparent 70%);
 }
 
 .main-wrapper {
@@ -46,6 +90,8 @@ onMounted(async () => {
   flex-direction: column;
   min-height: 100vh;
   width: calc(100% - 260px);
+  position: relative;
+  z-index: 1;
 }
 
 .main-content {

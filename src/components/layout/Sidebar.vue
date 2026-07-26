@@ -56,8 +56,8 @@ function handleMenuClick() {
     <!-- Logo -->
     <div class="sidebar-header">
       <div class="logo">
-        <span class="logo-icon">✨</span>
-        <span class="logo-text">Nayuki Admin</span>
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">Nayuki <span class="logo-thin">Admin</span></span>
       </div>
     </div>
 
@@ -184,40 +184,69 @@ function handleMenuClick() {
   }
 }
 
-/* 侧边栏 */
+/* 侧边栏 — 浅色玻璃（与博客端左栏一致的语言） */
 .sidebar {
   width: 260px;
   height: 100vh;
-  background: white;
-  border-right: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-right: 1px solid #f0f1f5;
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 100;
-  transition: transform 0.3s ease;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1.375rem 1.5rem;
+  border-bottom: 1px solid #f0f1f5;
+  position: relative;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.7rem;
 }
 
-.logo-icon {
-  font-size: 1.5rem;
+/* 几何 Logo 标记：墨蓝旋转方块 + 白色圆孔 */
+.logo-mark {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: #4c5670;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.logo:hover .logo-mark {
+  transform: rotate(225deg);
 }
 
 .logo-text {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1d24;
+  letter-spacing: -0.01em;
+}
+
+.logo-thin {
+  font-weight: 500;
+  color: #93a9c9;
 }
 
 .sidebar-nav {
@@ -226,52 +255,77 @@ function handleMenuClick() {
   overflow-y: auto;
 }
 
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #e6e8ee;
+  border: none;
+}
+
 .nav-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 
 .nav-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.625rem 1rem;
+  padding: 0.6rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
-  border-radius: 0.5rem;
+  color: #4b5162;
+  border-radius: 10px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .nav-item:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: #f2f4f8;
+  color: #1a1d24;
+  transform: translateX(2px);
 }
 
 .nav-item.active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eaeef4;
+  color: #1a1d24;
+  font-weight: 600;
+}
+
+/* active 左侧纯色指示条 */
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 52%;
+  border-radius: 999px;
+  background: #4c5670;
 }
 
 .nav-item.active .nav-icon {
-  color: #2563eb;
+  color: #4c5670;
 }
 
 .nav-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
+  color: #9096a5;
   transition: color 0.2s ease;
 }
 
 .nav-item:hover .nav-icon {
-  color: #64748b;
+  color: #4c5670;
 }
 
 .nav-label {
@@ -280,7 +334,7 @@ function handleMenuClick() {
 
 .sidebar-footer {
   padding: 1rem 1.25rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #f0f1f5;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -297,8 +351,9 @@ function handleMenuClick() {
 .user-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 10px;
   object-fit: cover;
+  border: 1px solid #e6e8ee;
 }
 
 .user-details {
@@ -311,7 +366,7 @@ function handleMenuClick() {
 .user-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #1e293b;
+  color: #1a1d24;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -319,7 +374,7 @@ function handleMenuClick() {
 
 .user-login {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #9096a5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -333,15 +388,15 @@ function handleMenuClick() {
   height: 36px;
   border: none;
   background: transparent;
-  border-radius: 0.5rem;
-  color: #94a3b8;
+  border-radius: 10px;
+  color: #9096a5;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .logout-btn:hover {
-  background: #fef2f2;
-  color: #ef4444;
+  background: #fdf0f0;
+  color: #d4626a;
 }
 
 .git-btn {
@@ -353,24 +408,24 @@ function handleMenuClick() {
   height: 36px;
   border: none;
   background: transparent;
-  border-radius: 0.5rem;
-  color: #94a3b8;
+  border-radius: 10px;
+  color: #9096a5;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .git-btn:hover {
-  background: #f0fdf4;
-  color: #22c55e;
+  background: #eaeef4;
+  color: #4c5670;
 }
 
 .git-btn.has-changes {
-  color: #f59e0b;
+  color: #d99a2b;
 }
 
 .git-btn.has-changes:hover {
-  background: #fffbeb;
-  color: #d97706;
+  background: #faf3e3;
+  color: #c78a1f;
 }
 
 .changes-badge {
@@ -385,7 +440,7 @@ function handleMenuClick() {
   line-height: 16px;
   text-align: center;
   color: white;
-  background: #ef4444;
+  background: #d4626a;
   border-radius: 9999px;
 }
 
@@ -396,12 +451,22 @@ function handleMenuClick() {
   }
 
   .sidebar {
+    background: #ffffff;
     transform: translateX(-100%);
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 8px 0 32px rgba(26, 29, 36, 0.12);
   }
 
   .sidebar.open {
     transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .nav-item,
+  .nav-icon,
+  .logo-mark {
+    transition: none;
   }
 }
 </style>
